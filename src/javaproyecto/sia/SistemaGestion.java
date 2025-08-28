@@ -2,6 +2,7 @@ package javaproyecto.sia;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 public class SistemaGestion {
     private List<Votante> listaVotantes;
@@ -38,5 +39,9 @@ public class SistemaGestion {
         for (LocalVotacion local : listaLocales) {
             System.out.println("Local: " + local.getNombre() + " - Votantes asignados: " + local.getListaVotantes().size());
         }
+    }
+    
+    public List<LocalVotacion> getListaLocales() {
+        return Collections.unmodifiableList(listaLocales);
     }
 }
