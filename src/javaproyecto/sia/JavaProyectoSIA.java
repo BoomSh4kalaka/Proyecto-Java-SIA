@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package javaproyecto.sia;
 
-/**
- *
- * @author franc
- */
 public class JavaProyectoSIA {
 
     public static void main(String[] args) {
@@ -54,6 +46,27 @@ public class JavaProyectoSIA {
             for (Votante vot : local.getListaVotantes()) {
                 System.out.println(" - " + vot.getNombre() + " (" + vot.getRut() + ")");
             }
+        }
+
+        // ========================
+        // DEMOSTRACIÓN SOBRECARGA
+        // ========================
+        System.out.println("\n===== BÚSQUEDA DE VOTANTES (SOBRECARGA) =====");
+
+        // Buscar por RUT
+        Votante buscadoRut = sistema.buscarVotante("22222222-2");
+        if (buscadoRut != null) {
+            System.out.println("Encontrado por RUT: " + buscadoRut.getNombre());
+        } else {
+            System.out.println("No se encontró el votante por RUT.");
+        }
+
+        // Buscar por Nombre y Apellido
+        Votante buscadoNombre = sistema.buscarVotante("Pedro", "Torres");
+        if (buscadoNombre != null) {
+            System.out.println("Encontrado por Nombre: " + buscadoNombre.getNombre() + " (" + buscadoNombre.getRut() + ")");
+        } else {
+            System.out.println("No se encontró el votante por Nombre.");
         }
     }
 }

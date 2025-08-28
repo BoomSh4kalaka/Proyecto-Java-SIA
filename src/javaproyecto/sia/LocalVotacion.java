@@ -1,7 +1,6 @@
 package javaproyecto.sia;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class LocalVotacion {
     private String idLocal;
@@ -9,7 +8,12 @@ public class LocalVotacion {
     private String direccion;
     private String comuna;
     private int capacidad;
+
+    // Colección anidada (lista)
     private List<Votante> listaVotantes;
+
+    // Mapa para buscar votantes rápidamente por RUT
+    private Map<String, Votante> mapaVotantes;
 
     public LocalVotacion(String idLocal, String nombre, String direccion, String comuna, int capacidad) {
         this.idLocal = idLocal;
@@ -18,6 +22,7 @@ public class LocalVotacion {
         this.comuna = comuna;
         this.capacidad = capacidad;
         this.listaVotantes = new ArrayList<>();
+        this.mapaVotantes = new HashMap<>();
     }
 
     // Getters y Setters
@@ -37,12 +42,20 @@ public class LocalVotacion {
     public void setCapacidad(int capacidad) { this.capacidad = capacidad; }
 
     public List<Votante> getListaVotantes() { return listaVotantes; }
+    public Map<String, Votante> getMapaVotantes() { return mapaVotantes; }
 
+    // Agregar votante (a lista y mapa)
     public void agregarVotante(Votante v) {
         if (listaVotantes.size() < capacidad) {
             listaVotantes.add(v);
+            mapaVotantes.put(v.getRut(), v);
         } else {
             System.out.println("Capacidad máxima alcanzada en " + nombre);
         }
+    }
+
+    // Buscar por RUT usando el mapa (rápido)
+    public Votante buscarPorRut(String rut) {
+        return mapaVotantes.get(rut);
     }
 }
