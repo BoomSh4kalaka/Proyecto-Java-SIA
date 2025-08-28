@@ -1,11 +1,67 @@
 package javaproyecto.sia;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;       
+
 public class JavaProyectoSIA {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Crear el sistema de gestión 
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         SistemaGestion sistema = new SistemaGestion();
         
+        //cargarDatosIniciales(sistema);
+                
+        int opcion;
+        
+        do {
+            System.out.println("\n===== MENÚ GESTIÓN DE ELECCIONES =====");
+            System.out.println("1. Agregar Votante Manualmente");
+            System.out.println("2. Agregar Local de Votación");
+            System.out.println("3. Realizar Asignación Automática de Votantes");
+            System.out.println("4. Mostrar Reporte de Locales y sus Votantes");
+            System.out.println("5. Salir");
+            System.out.print("Seleccione una opción: ");
+
+            try {
+                opcion = Integer.parseInt(reader.readLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Por favor, ingrese un número válido.");
+                opcion = 0;
+            }
+
+            switch (opcion) {
+                case 1:
+                    //agregarVotante(reader, sistema);
+                    break;
+                case 2:
+                    //agregarLocal(reader, sistema);
+                    break;
+                case 3:
+                    //System.out.println("\nIniciando asignación automática...");
+                    //sistema.autoAsignar();
+                    //System.out.println("Asignación automática completada.");
+                    break;
+                case 4:
+                    System.out.println("\n===== REPORTE DETALLADO DE LOCALES =====");
+                    //for (LocalVotacion local : sistema.getListaLocales()) {
+                        //local.mostrarInfo(true);
+                        //System.out.println("-------------------------------------");
+                    //}
+                    break;
+                case 5:
+                    System.out.println("Saliendo del sistema. ¡Adiós!");
+                    break;
+                default:
+                    System.out.println("Opción no válida. Por favor, intente de nuevo.");
+            }
+        } while (opcion != 5); // CORREGIDO: Faltaba ;
+
+        reader.close(); // CORREGIDO: Faltaba ;
+    }
+}
+        /*     
         // Registrar locales de votación
         LocalVotacion local1 = new LocalVotacion("L001", "Escuela Central", "Av. Principal 123", "Santiago", 3);
         LocalVotacion local2 = new LocalVotacion("L002", "Colegio Nacional", "Calle Secundaria 45", "Providencia", 2);
@@ -69,4 +125,5 @@ public class JavaProyectoSIA {
             System.out.println("No se encontró el votante por Nombre.");
         }
     }
-}
+
+*/
