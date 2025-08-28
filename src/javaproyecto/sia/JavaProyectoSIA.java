@@ -11,9 +11,9 @@ package javaproyecto.sia;
 public class JavaProyectoSIA {
 
     public static void main(String[] args) {
-        // Crear el sistema
+        // Crear el sistema de gestión 
         SistemaGestion sistema = new SistemaGestion();
-
+        
         // Registrar locales de votación
         LocalVotacion local1 = new LocalVotacion("L001", "Escuela Central", "Av. Principal 123", "Santiago", 3);
         LocalVotacion local2 = new LocalVotacion("L002", "Colegio Nacional", "Calle Secundaria 45", "Providencia", 2);
