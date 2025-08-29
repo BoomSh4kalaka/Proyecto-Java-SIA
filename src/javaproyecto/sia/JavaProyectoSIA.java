@@ -11,7 +11,7 @@ public class JavaProyectoSIA {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         SistemaGestion sistema = new SistemaGestion();
         
-        //cargarDatosIniciales(sistema);
+        sistema.cargarDatosIniciales();
                 
         int opcion;
         
@@ -61,6 +61,8 @@ public class JavaProyectoSIA {
         reader.close(); // CORREGIDO: Faltaba ;
     }
 }
+
+
         /*     
         // Registrar locales de votación
         LocalVotacion local1 = new LocalVotacion("L001", "Escuela Central", "Av. Principal 123", "Santiago", 3);
