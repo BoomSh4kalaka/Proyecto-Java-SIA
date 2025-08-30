@@ -33,22 +33,60 @@ public class JavaProyectoSIA {
 
             switch (opcion) {
                 case 1:
-                    //agregarVotante(reader, sistema);
+                    System.out.println("\n--- Registro de Nuevo Votante ---");
+                    System.out.print("RUT: ");
+                    String rut = reader.readLine();
+                    
+                    System.out.print("Nombre Completo: ");
+                    String nombre = reader.readLine();
+                    
+                    System.out.print("Dirección: ");
+                    String direccion = reader.readLine();
+                    
+                    System.out.print("Comuna: ");
+                    String comuna = reader.readLine();
+                    
+                    System.out.print("Edad: ");
+                    int edad = Integer.parseInt(reader.readLine());
+                    
+                    Votante nuevoVotante = new Votante(rut, nombre,direccion, comuna, edad);
+                    
+                    sistema.registrarVotante(nuevoVotante);
+                    
+                    System.out.println("¡Votante '" + nombre + "' registrado con éxito!");
                     break;
                 case 2:
-                    //agregarLocal(reader, sistema);
+                    System.out.println("\n--- Registro de Nuevo Local de Votación ---");
+
+                    System.out.print("Ingrese ID del Local (ej: L003): ");
+                    String id = reader.readLine();
+
+                    System.out.print("Ingrese Nombre del local: ");
+                    String nombreLocal = reader.readLine();
+
+                    System.out.print("Ingrese Dirección: ");
+                    String direccionLocal = reader.readLine();
+
+                    System.out.print("Ingrese Comuna: ");
+                    String comunaLocal = reader.readLine();
+
+                    System.out.print("Ingrese Capacidad máxima: ");
+                    int capacidad = Integer.parseInt(reader.readLine());
+
+                    LocalVotacion nuevoLocal = new LocalVotacion(id, nombreLocal, direccionLocal, comunaLocal, capacidad);
+
+                    sistema.registrarLocal(nuevoLocal);
+
+                    System.out.println("¡Local '" + nombreLocal + "' registrado con éxito!");
                     break;
                 case 3:
-                    //System.out.println("\nIniciando asignación automática...");
-                    //sistema.autoAsignar();
-                    //System.out.println("Asignación automática completada.");
+                    System.out.println("\nIniciando asignación automática...");
+                    sistema.autoAsignar();
+                    System.out.println("Asignación automática completada.");
                     break;
                 case 4:
                     System.out.println("\n===== REPORTE DETALLADO DE LOCALES =====");
-                    //for (LocalVotacion local : sistema.getListaLocales()) {
-                        //local.mostrarInfo(true);
-                        //System.out.println("-------------------------------------");
-                    //}
+                    sistema.imprimirReporteGeneral();
                     break;
                 case 5:
                     System.out.println("Saliendo del sistema. ¡Adiós!");
@@ -56,9 +94,9 @@ public class JavaProyectoSIA {
                 default:
                     System.out.println("Opción no válida. Por favor, intente de nuevo.");
             }
-        } while (opcion != 5); // CORREGIDO: Faltaba ;
+        } while (opcion != 5); 
 
-        reader.close(); // CORREGIDO: Faltaba ;
+        reader.close(); 
     }
 }
 
