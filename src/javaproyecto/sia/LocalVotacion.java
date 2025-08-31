@@ -58,4 +58,20 @@ public class LocalVotacion {
     public Votante buscarPorRut(String rut) {
         return mapaVotantes.get(rut);
     }
+    
+    public void mostrarInfoDetallada() {
+        System.out.println("Local: " + this.nombre + " (ID: " + this.idLocal + ")");
+        System.out.println("  Comuna: " + this.comuna);
+        System.out.println("  Capacidad: " + this.listaVotantes.size() + " / " + this.capacidad);
+
+        if (this.listaVotantes.isEmpty()) {
+            System.out.println("  (Aún no hay votantes asignados)");
+        } else {
+            System.out.println("  Votantes Asignados:");
+            for (Votante votante : this.listaVotantes) {
+                // Imprime el nombre y RUT de cada votante
+                System.out.println("    - " + votante.getNombre() + " (" + votante.getRut() + ")");
+            }
+        }
+    }
 }
