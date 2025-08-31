@@ -2,12 +2,12 @@ package javaproyecto.sia;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.IOException;       
+import java.io.IOException;   
+
 
 public class JavaProyectoSIA {
 
     public static void main(String[] args) throws IOException {
-        // Crear el sistema de gestión 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         SistemaGestion sistema = new SistemaGestion();
         
@@ -17,10 +17,10 @@ public class JavaProyectoSIA {
         
         do {
             System.out.println("\n===== MENÚ GESTIÓN DE ELECCIONES =====");
-            System.out.println("1. Agregar Votante Manualmente");
+            System.out.println("1. Agregar Votante (pendiente de asignar)");
             System.out.println("2. Agregar Local de Votación");
             System.out.println("3. Realizar Asignación Automática de Votantes");
-            System.out.println("4. Mostrar Reporte de Locales y sus Votantes");
+            System.out.println("4. Mostrar Reporte de Locales y Votantes");
             System.out.println("5. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -49,11 +49,11 @@ public class JavaProyectoSIA {
                     System.out.print("Edad: ");
                     int edad = Integer.parseInt(reader.readLine());
                     
-                    Votante nuevoVotante = new Votante(rut, nombre,direccion, comuna, edad);
+                    Votante nuevoVotante = new Votante(rut, nombre, direccion, comuna, edad);
                     
                     sistema.registrarVotante(nuevoVotante);
                     
-                    System.out.println("¡Votante '" + nombre + "' registrado con éxito!");
+                    System.out.println("¡Votante '" + nombre + "' registrado con éxito (pendiente de asignación)!");
                     break;
                 case 2:
                     System.out.println("\n--- Registro de Nuevo Local de Votación ---");
@@ -82,10 +82,8 @@ public class JavaProyectoSIA {
                 case 3:
                     System.out.println("\nIniciando asignación automática...");
                     sistema.autoAsignar();
-                    System.out.println("Asignación automática completada.");
                     break;
                 case 4:
-                    System.out.println("\n===== REPORTE DETALLADO DE LOCALES =====");
                     sistema.imprimirReporteGeneral();
                     break;
                 case 5:
@@ -99,6 +97,7 @@ public class JavaProyectoSIA {
         reader.close(); 
     }
 }
+
 
 
         /*     

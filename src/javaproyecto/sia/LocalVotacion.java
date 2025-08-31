@@ -9,11 +9,8 @@ public class LocalVotacion {
     private String comuna;
     private int capacidad;
 
-    // Colección anidada (lista)
-    private List<Votante> listaVotantes;
-
-    // Mapa para buscar votantes rápidamente por RUT
-    private Map<String, Votante> mapaVotantes;
+    // Mapa de votantes (clave = rut)
+    private Map<String, Votante> mapaVotantes = new HashMap<>();
 
     public LocalVotacion(String idLocal, String nombre, String direccion, String comuna, int capacidad) {
         this.idLocal = idLocal;
@@ -21,55 +18,47 @@ public class LocalVotacion {
         this.direccion = direccion;
         this.comuna = comuna;
         this.capacidad = capacidad;
-        this.listaVotantes = new ArrayList<>();
-        this.mapaVotantes = new HashMap<>();
     }
 
-    // Getters y Setters
+    // Getters
     public String getIdLocal() { return idLocal; }
-    public void setIdLocal(String idLocal) { this.idLocal = idLocal; }
-
     public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
     public String getDireccion() { return direccion; }
-    public void setDireccion(String direccion) { this.direccion = direccion; }
-
     public String getComuna() { return comuna; }
-    public void setComuna(String comuna) { this.comuna = comuna; }
-
     public int getCapacidad() { return capacidad; }
-    public void setCapacidad(int capacidad) { this.capacidad = capacidad; }
 
-    public List<Votante> getListaVotantes() { return listaVotantes; }
-    public Map<String, Votante> getMapaVotantes() { return mapaVotantes; }
-
-    // Agregar votante (a lista y mapa)
-    public void agregarVotante(Votante v) {
-        if (listaVotantes.size() < capacidad) {
-            listaVotantes.add(v);
+    // Métodos principales
+    public boolean agregarVotante(Votante v) {
+        if (mapaVotantes.size() < capacidad) {
             mapaVotantes.put(v.getRut(), v);
-        } else {
-            System.out.println("Capacidad máxima alcanzada en " + nombre);
+            v.setLocalAsignado(this);
+            return true;
         }
+        return false;
     }
 
-    // Buscar por RUT usando el mapa (rápido)
     public Votante buscarPorRut(String rut) {
         return mapaVotantes.get(rut);
     }
-    
+
+    public Collection<Votante> getVotantes() {
+        return mapaVotantes.values();
+    }
+
+    public int getCantidadVotantes() {
+        return mapaVotantes.size();
+    }
+
     public void mostrarInfoDetallada() {
         System.out.println("Local: " + this.nombre + " (ID: " + this.idLocal + ")");
         System.out.println("  Comuna: " + this.comuna);
-        System.out.println("  Capacidad: " + this.listaVotantes.size() + " / " + this.capacidad);
+        System.out.println("  Capacidad: " + this.getCantidadVotantes() + " / " + this.capacidad);
 
-        if (this.listaVotantes.isEmpty()) {
+        if (mapaVotantes.isEmpty()) {
             System.out.println("  (Aún no hay votantes asignados)");
         } else {
             System.out.println("  Votantes Asignados:");
-            for (Votante votante : this.listaVotantes) {
-                // Imprime el nombre y RUT de cada votante
+            for (Votante votante : mapaVotantes.values()) {
                 System.out.println("    - " + votante.getNombre() + " (" + votante.getRut() + ")");
             }
         }
