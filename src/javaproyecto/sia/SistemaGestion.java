@@ -61,7 +61,28 @@ public class SistemaGestion {
         }
         System.out.println("Proceso de asignación finalizado.");
     }
+    
+    public LocalVotacion buscarLocal(String nombre) {
+        for (LocalVotacion l : listaLocales) {
+            if (l.getNombre().equalsIgnoreCase(nombre)) return l;
+        }
+        return null;
+    }
 
+    public LocalVotacion buscarLocal(String nombre, String comuna) {
+    for (LocalVotacion l : listaLocales) {
+        if (l.getNombre().equalsIgnoreCase(nombre) &&
+            l.getComuna().equalsIgnoreCase(comuna)) {
+            return l;
+        }
+    }
+    return null;
+}
+
+    public List<LocalVotacion> getListaLocales() {
+        return Collections.unmodifiableList(listaLocales);
+    }
+    
     public void imprimirReporteGeneral() {
         System.out.println("\n===== REPORTE GENERAL DE LOCALES DE VOTACIÓN =====");
         if (listaLocales.isEmpty()) {

@@ -17,11 +17,13 @@ public class JavaProyectoSIA {
         
         do {
             System.out.println("\n===== MENÚ GESTIÓN DE ELECCIONES =====");
-            System.out.println("1. Agregar Votante (pendiente de asignar)");
+            System.out.println("1. Agregar Votante Manualmente");
             System.out.println("2. Agregar Local de Votación");
             System.out.println("3. Realizar Asignación Automática de Votantes");
-            System.out.println("4. Mostrar Reporte de Locales y Votantes");
-            System.out.println("5. Salir");
+            System.out.println("4. Mostrar Reporte de Locales y sus Votantes");
+            System.out.println("5. Buscar Local");
+            System.out.println("6. Buscar Votante");
+            System.out.println("7. Salir");
             System.out.print("Seleccione una opción: ");
 
             try {
@@ -86,13 +88,74 @@ public class JavaProyectoSIA {
                 case 4:
                     sistema.imprimirReporteGeneral();
                     break;
-                case 5:
+                case 5: // Buscar Local
+                    System.out.println("\n--- Búsqueda de Local ---");
+                    System.out.print("Ingrese nombre del local: ");
+                    String nombreBuscar = reader.readLine();
+
+                    System.out.print("¿Desea especificar comuna? (s/n): ");
+                    String resp = reader.readLine();
+                    LocalVotacion localEncontrado = null;
+
+                    if (resp.equalsIgnoreCase("s")) {
+                        System.out.print("Ingrese comuna: ");
+                        String comunaBuscar = reader.readLine();
+                        localEncontrado = sistema.buscarLocal(nombreBuscar, comunaBuscar);
+                    } else {
+                        localEncontrado = sistema.buscarLocal(nombreBuscar);
+                    }
+
+                    if (localEncontrado != null) {
+                        System.out.println("Local encontrado: " + localEncontrado.getNombre() + " en comuna " + localEncontrado.getComuna());
+                    } else {
+                        System.out.println("Local no encontrado.");
+                    }
+                    break;
+                case 6: // Buscar Votante
+                    System.out.println("\n--- Búsqueda de Votante ---");
+                    System.out.print("Desea buscar por RUT o por Nombre completo? (rut/nombre): ");
+                    String tipoBusqueda = reader.readLine();
+                    Votante votanteEncontrado = null;
+
+                    if (tipoBusqueda.equalsIgnoreCase("rut")) {
+                        System.out.print("Ingrese RUT: ");
+                        String rutBuscar = reader.readLine();
+                        for (LocalVotacion l : sistema.getListaLocales()) {
+                            votanteEncontrado = l.buscarVotante(rutBuscar);
+                            if (votanteEncontrado != null) break;
+                        }
+                    } else if (tipoBusqueda.equalsIgnoreCase("nombre")) {
+                        System.out.print("Ingrese nombre completo: ");
+                        String nombreCompleto = reader.readLine().trim();
+                        String[] partes = nombreCompleto.split("\\s+"); // separa por espacios
+                        if (partes.length >= 2) {
+                            String nombreV = partes[0];
+                            String apellidoV = partes[1];
+                            for (LocalVotacion l : sistema.getListaLocales()) {
+                                votanteEncontrado = l.buscarVotante(nombreV, apellidoV);
+                                if (votanteEncontrado != null) break;
+                            }
+                        } else {
+                            System.out.println("Debe ingresar al menos nombre y apellido.");
+                        }
+                    } else {
+                        System.out.println("Opción de búsqueda inválida.");
+                    }
+
+                    if (votanteEncontrado != null) {
+                        System.out.println("Votante encontrado: " + votanteEncontrado.getNombre() +
+                                " en local " + votanteEncontrado.getLocalAsignado().getNombre());
+                    } else {
+                        System.out.println("Votante no encontrado.");
+                    }
+                    break;
+                case 7:
                     System.out.println("Saliendo del sistema. ¡Adiós!");
                     break;
                 default:
                     System.out.println("Opción no válida. Por favor, intente de nuevo.");
             }
-        } while (opcion != 5); 
+        } while (opcion != 7); 
 
         reader.close(); 
     }

@@ -37,10 +37,20 @@ public class LocalVotacion {
         return false;
     }
 
-    public Votante buscarPorRut(String rut) {
+    public Votante buscarVotante(String rut) {
         return mapaVotantes.get(rut);
     }
 
+    public Votante buscarVotante(String nombre, String apellido) {
+        for (Votante v : mapaVotantes.values()) {
+            String[] partes = v.getNombre().split(" ");
+            if (partes.length >= 2 && partes[0].equalsIgnoreCase(nombre) && partes[1].equalsIgnoreCase(apellido)) {
+                return v;
+            }
+        }
+        return null;
+    }
+    
     public Collection<Votante> getVotantes() {
         return mapaVotantes.values();
     }
