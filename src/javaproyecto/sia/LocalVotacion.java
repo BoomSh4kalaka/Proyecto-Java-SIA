@@ -82,4 +82,11 @@ public class LocalVotacion {
             }
         }
     }
+    
+    public boolean eliminarVotante(String rut) {   
+        return mapaVotantes.remove(rut) != null; 
+    }
+    
+    
+    
 }
