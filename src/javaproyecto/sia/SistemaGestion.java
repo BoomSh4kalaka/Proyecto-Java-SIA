@@ -10,6 +10,23 @@ import java.util.*;
 public class SistemaGestion {
     private List<LocalVotacion> listaLocales = new ArrayList<>();
     private List<Votante> votantesPendientes = new ArrayList<>();
+    
+        // ===== Resultado de búsqueda (nivel 1 o 2) =====
+    public static class ResultadoBusquedaVotante {
+        private final Votante votante;
+        private final LocalVotacion local; // null si está pendiente
+        private final boolean esPendiente;
+
+        public ResultadoBusquedaVotante(Votante votante, LocalVotacion local, boolean esPendiente) {
+            this.votante = votante;
+            this.local = local;
+            this.esPendiente = esPendiente;
+        }
+
+        public Votante getVotante() { return votante; }
+        public LocalVotacion getLocal() { return local; }
+        public boolean isPendiente() { return esPendiente; }
+    }
 
     public void cargarDatosIniciales() {
         // Registrar locales de votación de ejemplo
@@ -77,7 +94,53 @@ public class SistemaGestion {
         }
     }
     return null;
+
 }
+    public LocalVotacion buscarLocalPorId(String id) {
+        for (LocalVotacion l : listaLocales) {
+            if (l.getIdLocal().equalsIgnoreCase(id)) return l;
+        }
+        return null;
+    }
+
+        // ===== BUSCAR EN 1+ NIVELES: VOTANTE POR RUT =====
+    public ResultadoBusquedaVotante buscarVotanteGlobalPorRut(String rut) {
+        // 1) Buscar en todos los locales (nivel 2)
+        for (LocalVotacion l : listaLocales) {
+            Votante v = l.buscarVotante(rut);
+            if (v != null) {
+                return new ResultadoBusquedaVotante(v, l, false);
+            }
+        }
+        // 2) Buscar en pendientes (no asignados)
+        for (Votante vp : votantesPendientes) {
+            if (vp.getRut().equalsIgnoreCase(rut)) {
+                return new ResultadoBusquedaVotante(vp, null, true);
+            }
+        }
+        return null;
+    }
+        // ===== BUSCAR EN 1+ NIVELES: VOTANTE POR NOMBRE/APELLIDO =====
+    public ResultadoBusquedaVotante buscarVotanteGlobalPorNombre(String nombre, String apellido) {
+        // 1) Buscar en todos los locales (nivel 2)
+        for (LocalVotacion l : listaLocales) {
+            Votante v = l.buscarVotante(nombre, apellido); // ya implementado en LocalVotacion
+            if (v != null) {
+                return new ResultadoBusquedaVotante(v, l, false);
+            }
+        }
+        // 2) Buscar en pendientes
+        for (Votante vp : votantesPendientes) {
+            String[] partes = vp.getNombre().split("\\s+");
+            if (partes.length >= 2 &&
+                partes[0].equalsIgnoreCase(nombre) &&
+                partes[1].equalsIgnoreCase(apellido)) {
+                return new ResultadoBusquedaVotante(vp, null, true);
+            }
+        }
+        return null;
+    }
+
 
     public List<LocalVotacion> getListaLocales() {
         return Collections.unmodifiableList(listaLocales);

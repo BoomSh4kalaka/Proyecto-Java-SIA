@@ -7,9 +7,11 @@ import java.io.IOException;
 
 public class JavaProyectoSIA {
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        SistemaGestion sistema = new SistemaGestion();
+    public static void main(String[] args) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            SistemaGestion sistema = new SistemaGestion();
+        
         
         sistema.cargarDatosIniciales();
                 
@@ -49,13 +51,15 @@ public class JavaProyectoSIA {
                     String comuna = reader.readLine();
                     
                     System.out.print("Edad: ");
-                    int edad = Integer.parseInt(reader.readLine());
-                    
-                    Votante nuevoVotante = new Votante(rut, nombre, direccion, comuna, edad);
-                    
-                    sistema.registrarVotante(nuevoVotante);
-                    
-                    System.out.println("¡Votante '" + nombre + "' registrado con éxito (pendiente de asignación)!");
+                    try {
+                        int edad = Integer.parseInt(reader.readLine());
+                        Votante nuevoVotante = new Votante(rut, nombre, direccion, comuna, edad);
+                        sistema.registrarVotante(nuevoVotante);
+                        System.out.println("¡Votante '" + nombre + "' registrado con éxito (pendiente de asignación)!");
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: la edad debe ser un número entero válido.");
+                    }
+
                     break;
                 case 2:
                     System.out.println("\n--- Registro de Nuevo Local de Votación ---");
@@ -71,15 +75,17 @@ public class JavaProyectoSIA {
 
                     System.out.print("Ingrese Comuna: ");
                     String comunaLocal = reader.readLine();
-
+                    
                     System.out.print("Ingrese Capacidad máxima: ");
-                    int capacidad = Integer.parseInt(reader.readLine());
+                    try {
+                        int capacidad = Integer.parseInt(reader.readLine());
+                        LocalVotacion nuevoLocal = new LocalVotacion(id, nombreLocal, direccionLocal, comunaLocal, capacidad);
+                        sistema.registrarLocal(nuevoLocal);
+                        System.out.println("¡Local '" + nombreLocal + "' registrado con éxito!");
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: la capacidad debe ser un número entero válido.");
+                    }
 
-                    LocalVotacion nuevoLocal = new LocalVotacion(id, nombreLocal, direccionLocal, comunaLocal, capacidad);
-
-                    sistema.registrarLocal(nuevoLocal);
-
-                    System.out.println("¡Local '" + nombreLocal + "' registrado con éxito!");
                     break;
                 case 3:
                     System.out.println("\nIniciando asignación automática...");
@@ -89,52 +95,60 @@ public class JavaProyectoSIA {
                     sistema.imprimirReporteGeneral();
                     break;
                 case 5: // Buscar Local
-                    System.out.println("\n--- Búsqueda de Local ---");
-                    System.out.print("Ingrese nombre del local: ");
-                    String nombreBuscar = reader.readLine();
+                        System.out.println("\n--- Búsqueda de Local ---");
+                        System.out.print("Buscar por (1) ID, (2) Nombre, (3) Nombre+Comuna: ");
+                        String modo = reader.readLine().trim();
+                        LocalVotacion localEncontrado = null;
 
-                    System.out.print("¿Desea especificar comuna? (s/n): ");
-                    String resp = reader.readLine();
-                    LocalVotacion localEncontrado = null;
+                        if ("1".equals(modo)) {
+                            System.out.print("Ingrese ID del local: ");
+                            String idBuscar = reader.readLine().trim();
+                            localEncontrado = sistema.buscarLocalPorId(idBuscar);
 
-                    if (resp.equalsIgnoreCase("s")) {
-                        System.out.print("Ingrese comuna: ");
-                        String comunaBuscar = reader.readLine();
-                        localEncontrado = sistema.buscarLocal(nombreBuscar, comunaBuscar);
-                    } else {
-                        localEncontrado = sistema.buscarLocal(nombreBuscar);
-                    }
+                        } else if ("2".equals(modo)) {
+                            System.out.print("Ingrese nombre del local: ");
+                            String nombreBuscar = reader.readLine();
+                            localEncontrado = sistema.buscarLocal(nombreBuscar);
 
-                    if (localEncontrado != null) {
-                        System.out.println("Local encontrado: " + localEncontrado.getNombre() + " en comuna " + localEncontrado.getComuna());
-                    } else {
-                        System.out.println("Local no encontrado.");
-                    }
-                    break;
-                case 6: // Buscar Votante
-                    System.out.println("\n--- Búsqueda de Votante ---");
-                    System.out.print("Desea buscar por RUT o por Nombre completo? (rut/nombre): ");
+                        } else if ("3".equals(modo)) {
+                            System.out.print("Ingrese nombre del local: ");
+                            String nombreBuscar = reader.readLine();
+                            System.out.print("Ingrese comuna: ");
+                            String comunaBuscar = reader.readLine();
+                            localEncontrado = sistema.buscarLocal(nombreBuscar, comunaBuscar);
+
+                        } else {
+                            System.out.println("Opción inválida.");
+                        }
+
+                        if (localEncontrado != null) {
+                            System.out.println("Local encontrado: " + localEncontrado.getNombre() +
+                                               " (ID " + localEncontrado.getIdLocal() + ") en comuna " +
+                                               localEncontrado.getComuna());
+                        } else {
+                            System.out.println("Local no encontrado.");
+                        }
+                        break;
+
+                case 6: // Buscar Votante (global: locales + pendientes)
+                    System.out.println("\n--- Búsqueda Global de Votante ---");
+                    System.out.print("¿Desea buscar por RUT o por Nombre completo? (rut/nombre): ");
                     String tipoBusqueda = reader.readLine();
-                    Votante votanteEncontrado = null;
+                    SistemaGestion.ResultadoBusquedaVotante res = null;
 
                     if (tipoBusqueda.equalsIgnoreCase("rut")) {
                         System.out.print("Ingrese RUT: ");
-                        String rutBuscar = reader.readLine();
-                        for (LocalVotacion l : sistema.getListaLocales()) {
-                            votanteEncontrado = l.buscarVotante(rutBuscar);
-                            if (votanteEncontrado != null) break;
-                        }
+                        String rutBuscar = reader.readLine().trim();
+                        res = sistema.buscarVotanteGlobalPorRut(rutBuscar);
+
                     } else if (tipoBusqueda.equalsIgnoreCase("nombre")) {
                         System.out.print("Ingrese nombre completo: ");
                         String nombreCompleto = reader.readLine().trim();
-                        String[] partes = nombreCompleto.split("\\s+"); // separa por espacios
+                        String[] partes = nombreCompleto.split("\\s+");
                         if (partes.length >= 2) {
                             String nombreV = partes[0];
                             String apellidoV = partes[1];
-                            for (LocalVotacion l : sistema.getListaLocales()) {
-                                votanteEncontrado = l.buscarVotante(nombreV, apellidoV);
-                                if (votanteEncontrado != null) break;
-                            }
+                            res = sistema.buscarVotanteGlobalPorNombre(nombreV, apellidoV);
                         } else {
                             System.out.println("Debe ingresar al menos nombre y apellido.");
                         }
@@ -142,13 +156,20 @@ public class JavaProyectoSIA {
                         System.out.println("Opción de búsqueda inválida.");
                     }
 
-                    if (votanteEncontrado != null) {
-                        System.out.println("Votante encontrado: " + votanteEncontrado.getNombre() +
-                                " en local " + votanteEncontrado.getLocalAsignado().getNombre());
+                    if (res != null) {
+                        if (res.isPendiente()) {
+                            System.out.println("Votante encontrado (PENDIENTE): " + res.getVotante().getNombre() +
+                                               " (" + res.getVotante().getRut() + ") — aún sin local asignado.");
+                        } else {
+                            System.out.println("Votante encontrado: " + res.getVotante().getNombre() +
+                                               " (" + res.getVotante().getRut() + ")" +
+                                               " en local " + res.getLocal().getNombre());
+                        }
                     } else {
-                        System.out.println("Votante no encontrado.");
+                        System.out.println("Votante no encontrado en ninguno de los niveles.");
                     }
                     break;
+
                 case 7:
                     System.out.println("Saliendo del sistema. ¡Adiós!");
                     break;
@@ -158,6 +179,10 @@ public class JavaProyectoSIA {
         } while (opcion != 7); 
 
         reader.close(); 
+        
+            } catch (IOException e) {
+        System.out.println("Error de entrada/salida: " + e.getMessage());
+    }
     }
 }
 
