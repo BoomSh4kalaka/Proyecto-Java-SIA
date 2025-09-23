@@ -34,7 +34,14 @@ public class LocalVotacion {
     public void setComuna(String comuna) {this.comuna = comuna;}
     
     public int getCapacidad() { return capacidad; }
-    public void setCapacidad(int capacidad) {this.capacidad = capacidad;}
+    
+    public boolean setCapacidad(int nuevaCapacidad) {
+        if (nuevaCapacidad >= getCantidadVotantes()) {
+            this.capacidad = nuevaCapacidad;
+            return true;
+        }
+        return false;
+    }
 
     // Métodos principales
     public boolean agregarVotante(Votante v) {
@@ -82,11 +89,4 @@ public class LocalVotacion {
             }
         }
     }
-    
-    public boolean eliminarVotante(String rut) {   
-        return mapaVotantes.remove(rut) != null; 
-    }
-    
-    
-    
 }

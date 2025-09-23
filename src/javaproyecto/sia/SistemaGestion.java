@@ -102,7 +102,40 @@ public class SistemaGestion {
         }
         return null;
     }
-
+    public boolean eliminarLocalPorId(String idLocal) {
+        for (Iterator<LocalVotacion> it = listaLocales.iterator(); it.hasNext(); ) {
+            LocalVotacion l = it.next();
+            if (l.getIdLocal().equalsIgnoreCase(idLocal)) {
+                // mover asignados a pendientes
+                for (Votante v : l.getVotantes()) { // ya tienes getVotantes() 
+                    v.setLocalAsignado(null);       // limpiar referencia
+                    votantesPendientes.add(v);      // vuelve a pendientes
+                }
+                it.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean modificarLocal(String idLocal, String nuevoNombre,
+                              String nuevaDireccion, String nuevaComuna,
+                              Integer nuevaCapacidad) {
+        for (LocalVotacion l : listaLocales) {
+            if (l.getIdLocal().equalsIgnoreCase(idLocal)) {
+                if (nuevoNombre != null && !nuevoNombre.isBlank()) l.setNombre(nuevoNombre);
+                if (nuevaDireccion != null && !nuevaDireccion.isBlank()) l.setDireccion(nuevaDireccion);
+                if (nuevaComuna != null && !nuevaComuna.isBlank()) l.setComuna(nuevaComuna);
+                if (nuevaCapacidad != null) {
+                    if (!l.setCapacidad(nuevaCapacidad)) {
+                        // no se puede bajar por debajo de asignados
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+    return false;
+}
         // ===== BUSCAR EN 1+ NIVELES: VOTANTE POR RUT =====
     public ResultadoBusquedaVotante buscarVotanteGlobalPorRut(String rut) {
         // 1) Buscar en todos los locales (nivel 2)
@@ -165,35 +198,4 @@ public class SistemaGestion {
             }
         }
     }
-    
-    public String eliminarVotanteGlobal(String rut) {
-        
-        ResultadoBusquedaVotante res = buscarVotanteGlobalPorRut(rut);
-        
-        if (res == null) {
-            return "Error: Votante con RUT " + rut + " no fue encontrado.";
-        }
-
-        if (res.isPendiente()) {
-            votantesPendientes.remove(res.getVotante());
-            return "¡Éxito! Votante pendiente '" + res.getVotante().getNombre() + "' ha sido eliminado.";
-        } else {
-            LocalVotacion local = res.getLocal();
-            boolean eliminado = local.eliminarVotante(rut);
-            if (eliminado) {
-                // Este es el punto clave para la reorganización
-                return "¡Éxito! Votante '" + res.getVotante().getNombre() + "' eliminado del local '" + local.getNombre() + "'. Se ha liberado un cupo.";
-            } else {
-                // Esto no debería ocurrir si la búsqueda funcionó, pero es una buena práctica
-                return "Error inesperado: No se pudo eliminar el votante del local.";
-            }
-        }
-        
-    }
-    
-    
-    
-    
-    
-    
 }
