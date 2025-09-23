@@ -25,7 +25,9 @@ public class JavaProyectoSIA {
             System.out.println("4. Mostrar Reporte de Locales y sus Votantes");
             System.out.println("5. Buscar Local");
             System.out.println("6. Buscar Votante");
-            System.out.println("7. Salir");
+            System.out.println("7. Eliminar Local (por ID)");
+            System.out.println("8. Modificar Local (por ID)");
+            System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
             try {
@@ -169,14 +171,61 @@ public class JavaProyectoSIA {
                         System.out.println("Votante no encontrado en ninguno de los niveles.");
                     }
                     break;
+                case 7: // Eliminar Local por ID
+                    System.out.println("\n--- Eliminar Local ---");
+                    System.out.print("Ingrese ID del Local: ");
+                    String idDel = reader.readLine().trim();
+                    boolean elim = sistema.eliminarLocalPorId(idDel);
+                    if (elim) {
+                        System.out.println("Local eliminado. (Si tenía votantes, fueron movidos a pendientes).");
+                    } else {
+                        System.out.println("No se encontró un local con ese ID.");
+                    }
+                    break;
 
-                case 7:
+                case 8: // Modificar Local por ID
+                    System.out.println("\n--- Modificar Local ---");
+                    System.out.print("Ingrese ID del Local a modificar: ");
+                    String idMod = reader.readLine().trim();
+
+                    System.out.print("Nuevo nombre (Enter para mantener): ");
+                    String nNombre = reader.readLine();
+                    if (nNombre != null && nNombre.isBlank()) nNombre = null;
+
+                    System.out.print("Nueva dirección (Enter para mantener): ");
+                    String nDir = reader.readLine();
+                    if (nDir != null && nDir.isBlank()) nDir = null;
+
+                    System.out.print("Nueva comuna (Enter para mantener): ");
+                    String nCom = reader.readLine();
+                    if (nCom != null && nCom.isBlank()) nCom = null;
+
+                    System.out.print("Nueva capacidad (Enter para mantener): ");
+                    String capStr = reader.readLine().trim();
+                    Integer nCap = null;
+                    if (!capStr.isBlank()) {
+                        try { nCap = Integer.parseInt(capStr); }
+                        catch (NumberFormatException e) {
+                            System.out.println("Capacidad inválida. Operación cancelada.");
+                            break;
+                        }
+                    }
+
+                    boolean modOk = sistema.modificarLocal(idMod, nNombre, nDir, nCom, nCap);
+                    if (modOk) {
+                        System.out.println("Local modificado con éxito.");
+                    } else {
+                        System.out.println("No se pudo modificar (ID inexistente o capacidad menor a asignados).");
+                    }
+                    break;
+
+                case 0:
                     System.out.println("Saliendo del sistema. ¡Adiós!");
                     break;
                 default:
                     System.out.println("Opción no válida. Por favor, intente de nuevo.");
             }
-        } while (opcion != 7); 
+        } while (opcion != 0); 
 
         reader.close(); 
         
