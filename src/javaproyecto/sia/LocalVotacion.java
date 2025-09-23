@@ -89,4 +89,11 @@ public class LocalVotacion {
             }
         }
     }
+    
+    public boolean eliminarVotante(String rut) {
+        // El método remove de un Map devuelve el valor asociado a la clave 
+        // si existía, o null si no. Comprobamos si no fue null.
+        return mapaVotantes.remove(rut) != null; 
+    }
+    
 }

@@ -198,4 +198,32 @@ public class SistemaGestion {
             }
         }
     }
+    
+    
+    public String eliminarVotanteGlobal(String rut) {
+        ResultadoBusquedaVotante res = buscarVotanteGlobalPorRut(rut);
+
+        if (res == null) {
+            return "Error: Votante con RUT " + rut + " no fue encontrado.";
+        }
+
+        if (res.isPendiente()) {
+            votantesPendientes.remove(res.getVotante());
+            return "¡Éxito! Votante pendiente '" + res.getVotante().getNombre() + "' ha sido eliminado.";
+        } else {
+            LocalVotacion local = res.getLocal();
+            boolean eliminado = local.eliminarVotante(rut);
+            if (eliminado) {
+                // Este es el punto clave para la reorganización
+                return "¡Éxito! Votante '" + res.getVotante().getNombre() + "' eliminado del local '" + local.getNombre() + "'. Se ha liberado un cupo.";
+            } else {
+                // Esto no debería ocurrir si la búsqueda funcionó, pero es una buena práctica
+                return "Error inesperado: No se pudo eliminar el votante del local.";
+            }
+        }
+    }
+    
+    
+    
+    
 }
