@@ -31,8 +31,23 @@ public class SistemaGestion {
     public void registrarLocal(LocalVotacion l) {
         listaLocales.add(l);
     }
-
-    public void registrarVotante(Votante v) {
+    
+    
+    //SIA 2.9
+    public void registrarVotante(Votante v) throws RutDuplicadoException {
+        // 1) Revisar en pendientes
+        for (Votante vp : votantesPendientes) {
+            if (vp.getRut().equalsIgnoreCase(v.getRut())) {
+                throw new RutDuplicadoException("El RUT " + v.getRut() + " ya está registrado como pendiente.");
+            }
+        }
+        // 2) Revisar en locales ya asignados
+        for (LocalVotacion l : listaLocales) {
+            if (l.buscarVotante(v.getRut()) != null) {
+                throw new RutDuplicadoException("El RUT " + v.getRut() + " ya existe en el local " + l.getNombre());
+            }
+        }
+        // 3) Si pasa las validaciones, agregar
         votantesPendientes.add(v);
     }
 
@@ -48,11 +63,18 @@ public class SistemaGestion {
                 boolean hayCapacidad = local.getCantidadVotantes() < local.getCapacidad();
 
                 if (mismaComuna && hayCapacidad) {
-                    local.agregarVotante(votante);
-                    System.out.println(" > Votante '" + votante.getNombre() + "' asignado a -> " + local.getNombre());
-                    it.remove(); // lo sacamos de pendientes
-                    asignado = true;
-                    break;
+                    try {
+                        // ahora puede lanzar CapacidadAgotadaException
+                        local.agregarVotante(votante);
+                        System.out.println(" > Votante '" + votante.getNombre() + "' asignado a -> " + local.getNombre());
+                        it.remove(); // lo sacamos de pendientes
+                        asignado = true;
+                        break;
+                    } catch (CapacidadAgotadaException e) {
+                        // Si otro hilo/operación llenó el local entre el chequeo y el add
+                        System.out.println(" ! No se pudo asignar a " + local.getNombre() + ": " + e.getMessage());
+                        // seguimos buscando otro local de la misma comuna
+                    }
                 }
             }
 
@@ -62,6 +84,7 @@ public class SistemaGestion {
         }
         System.out.println("Proceso de asignación finalizado.");
     }
+
     
     public LocalVotacion buscarLocal(String nombre) {
         for (LocalVotacion l : listaLocales) {

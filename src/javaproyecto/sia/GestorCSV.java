@@ -174,16 +174,33 @@ public class GestorCSV {
                     if (local == null) {
                         // Si el local no existía, crearlo "fantasma"
                         System.out.println("Aviso: local referenciado no existía. Se creó " + idLocal);
+                        // Usamos capacidad 0; si no alcanza, caerá en catch y lo mandaremos a pendientes
                         local = new LocalVotacion(idLocal, "Desconocido", "", comuna, 0);
                         sistema.registrarLocal(local);
                     }
 
-                    local.agregarVotante(v);
+                    // Intentar asignar al local (puede lanzar CapacidadAgotadaException)
+                    try {
+                        local.agregarVotante(v);
+                    } catch (CapacidadAgotadaException e) {
+                        System.out.println("Capacidad llena en '" + local.getNombre() + "'. Se enviará a pendientes: " + v.getRut());
+                        // Si no pudo entrar al local, lo registramos como pendiente
+                        try {
+                            sistema.registrarVotante(v);
+                        } catch (RutDuplicadoException exDup) {
+                            System.out.println("Duplicado detectado (pendientes) para RUT " + v.getRut() + ". Se omite.");
+                        }
+                    }
 
                 } else {
-                    // Sin local asignado → va a pendientes
-                    sistema.registrarVotante(v);
+                    // Sin local asignado → va a pendientes (puede lanzar RutDuplicadoException)
+                    try {
+                        sistema.registrarVotante(v);
+                    } catch (RutDuplicadoException exDup) {
+                        System.out.println("Duplicado detectado (pendientes) para RUT " + v.getRut() + ". Se omite.");
+                    }
                 }
+
             }
 
             System.out.println("Votantes cargados desde " + rutaVotantes);

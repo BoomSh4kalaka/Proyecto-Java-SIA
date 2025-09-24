@@ -56,10 +56,17 @@ public class JavaProyectoSIA {
                     
                     System.out.print("Edad: ");
                     try {
+                        
                         int edad = Integer.parseInt(reader.readLine());
                         Votante nuevoVotante = new Votante(rut, nombre, direccion, comuna, edad);
-                        sistema.registrarVotante(nuevoVotante);
-                        System.out.println("¡Votante '" + nombre + "' registrado con éxito (pendiente de asignación)!");
+                        
+                        // aquí va el nuevo try–catch para RutDuplicadoException
+                        try {
+                            sistema.registrarVotante(nuevoVotante);
+                            System.out.println("¡Votante '" + nombre + "' registrado con éxito (pendiente de asignación)!");
+                        } catch (RutDuplicadoException e) {
+                            System.out.println("Error: " + e.getMessage());
+                        }
                     } catch (NumberFormatException e) {
                         System.out.println("Error: la edad debe ser un número entero válido.");
                     }

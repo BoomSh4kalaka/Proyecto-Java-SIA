@@ -44,14 +44,15 @@ public class LocalVotacion {
     }
 
     // Métodos principales
-    public boolean agregarVotante(Votante v) {
-        if (mapaVotantes.size() < capacidad) {
-            mapaVotantes.put(v.getRut(), v);
-            v.setLocalAsignado(this);
-            return true;
+    //SIA 2.9
+    public void agregarVotante(Votante v) throws CapacidadAgotadaException {
+        if (mapaVotantes.size() >= capacidad) {
+            throw new CapacidadAgotadaException("El local '" + nombre + "' ya alcanzó su capacidad máxima.");
         }
-        return false;
+        mapaVotantes.put(v.getRut(), v);
+        v.setLocalAsignado(this);
     }
+
 
     public Votante buscarVotante(String rut) {
         return mapaVotantes.get(rut);
