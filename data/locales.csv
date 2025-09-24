@@ -1,4 +1,4 @@
-Id,Nombre,Comuna,Capacidad
-L001,Escuela Central,Santiago,2
-L002,Colegio Nacional,Providencia,2
-L003,Liceo Moderno,Ñuñoa,3
+Id,Nombre,Direccion,Comuna,Capacidad
+L001,Escuela Central,,Santiago,2
+L002,Colegio Nacional,,Providencia,2
+L003,Liceo Moderno,,Ñuñoa,3

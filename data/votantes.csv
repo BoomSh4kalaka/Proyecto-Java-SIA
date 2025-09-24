@@ -1,2 +1,4 @@
-Rut,Nombre,Direccion,Comuna,Edad,LocalId
+Rut,Nombre,Direccion,Comuna,Edad,IdLocal
 11111111-1,Juan Pérez,Calle 1 #123,Santiago,30,L001
+21933230-0,Alfonso Capone,Calle 4 #121,Ñuñoa,20,L003
+21696402-0,Francisco Aros,El Boldal,Puchuncavi,20,

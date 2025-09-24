@@ -11,7 +11,7 @@ public class JavaProyectoSIA {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             SistemaGestion sistema = new SistemaGestion();
-                
+        GestorCSV gestor = new GestorCSV();
         int opcion;
         
         do {
@@ -24,6 +24,8 @@ public class JavaProyectoSIA {
             System.out.println("6. Buscar Votante");
             System.out.println("7. Eliminar Local (por ID)");
             System.out.println("8. Modificar Local (por ID)");
+            System.out.println("9. Cargar CSV");
+            System.out.println("10. Guardar CSV");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -215,7 +217,13 @@ public class JavaProyectoSIA {
                         System.out.println("No se pudo modificar (ID inexistente o capacidad menor a asignados).");
                     }
                     break;
-
+                
+                case 9:
+                    gestor.cargarTodo(sistema);
+                    break;
+                case 10:
+                    gestor.guardarTodo(sistema);
+                    break;
                 case 0:
                     System.out.println("Saliendo del sistema. ¡Adiós!");
                     break;
