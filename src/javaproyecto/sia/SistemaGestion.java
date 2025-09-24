@@ -28,22 +28,6 @@ public class SistemaGestion {
         public boolean isPendiente() { return esPendiente; }
     }
 
-    public void cargarDatosIniciales() {
-        // Registrar locales de votación de ejemplo
-        LocalVotacion local1 = new LocalVotacion("L001", "Escuela Central", "Av. Principal 123", "Santiago", 3);
-        LocalVotacion local2 = new LocalVotacion("L002", "Colegio Nacional", "Calle Secundaria 45", "Providencia", 2);
-        this.registrarLocal(local1);
-        this.registrarLocal(local2);
-
-        // Registrar votantes de ejemplo (se van como pendientes)
-        Votante v1 = new Votante("11111111-1", "Juan Pérez", "Calle 1", "Santiago", 30);
-        Votante v2 = new Votante("22222222-2", "María Gómez", "Calle 2", "Santiago", 28);
-        Votante v3 = new Votante("33333333-3", "Pedro Torres", "Calle 3", "Providencia", 40);
-        this.registrarVotante(v1);
-        this.registrarVotante(v2);
-        this.registrarVotante(v3);
-    }
-
     public void registrarLocal(LocalVotacion l) {
         listaLocales.add(l);
     }
@@ -102,6 +86,11 @@ public class SistemaGestion {
         }
         return null;
     }
+    
+    public List<Votante> getVotantesPendientes() {
+        return Collections.unmodifiableList(votantesPendientes);
+    }
+    
     public boolean eliminarLocalPorId(String idLocal) {
         for (Iterator<LocalVotacion> it = listaLocales.iterator(); it.hasNext(); ) {
             LocalVotacion l = it.next();

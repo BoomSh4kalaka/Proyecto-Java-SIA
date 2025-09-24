@@ -11,9 +11,6 @@ public class JavaProyectoSIA {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             SistemaGestion sistema = new SistemaGestion();
-        
-        
-        sistema.cargarDatosIniciales();
                 
         int opcion;
         
