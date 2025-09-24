@@ -90,6 +90,47 @@ public class SistemaGestion {
     public List<Votante> getVotantesPendientes() {
         return Collections.unmodifiableList(votantesPendientes);
     }
+     // ====== FILTROS SIA2.5 ======
+    // Votantes PENDIENTES por comuna y rango de edad [min, max]
+    public List<Votante> filtrarPendientesPorComunaYEdad(String comuna, int edadMin, int edadMax) {
+        List<Votante> res = new ArrayList<>();
+        String c = comuna.toLowerCase();
+        for (Votante v : votantesPendientes) {
+            if (v.getComuna().equalsIgnoreCase(comuna)
+                    && v.getEdad() >= edadMin
+                    && v.getEdad() <= edadMax) {
+                res.add(v);
+            }
+        }
+        return res;
+    }
+    // Votantes (ASIGNADOS en todos los locales + PENDIENTES) por comuna y rango [min, max]
+    public List<Votante> filtrarTodosPorComunaYEdad(String comuna, int edadMin, int edadMax) {
+        List<Votante> res = new ArrayList<>();
+        String c = comuna.toLowerCase();
+
+        // 1) Asignados: recorrer todos los locales y sus mapas de votantes
+        for (LocalVotacion l : listaLocales) { // listaLocales ya existe
+            for (Votante v : l.getVotantes()) { // acceso a colección interna del local
+                if (v.getComuna().equalsIgnoreCase(comuna)
+                        && v.getEdad() >= edadMin
+                        && v.getEdad() <= edadMax) {
+                    res.add(v);
+                }
+            }
+        }
+
+        // 2) Pendientes
+        for (Votante v : votantesPendientes) {
+            if (v.getComuna().equalsIgnoreCase(comuna)
+                    && v.getEdad() >= edadMin
+                    && v.getEdad() <= edadMax) {
+                res.add(v);
+            }
+        }
+        return res;
+    }
+
     
     public boolean eliminarLocalPorId(String idLocal) {
         for (Iterator<LocalVotacion> it = listaLocales.iterator(); it.hasNext(); ) {

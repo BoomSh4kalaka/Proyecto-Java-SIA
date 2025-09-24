@@ -27,6 +27,9 @@ public class JavaProyectoSIA {
             System.out.println("9. Cargar CSV");
             System.out.println("10. Guardar CSV");
             System.out.println("0. Salir");
+            System.out.println("11. Filtrar PENDIENTES por comuna y rango de edad");
+            System.out.println("12. Filtrar TODOS (asignados + pendientes) por comuna y rango de edad");
+
             System.out.print("Seleccione una opción: ");
 
             try {
@@ -224,6 +227,55 @@ public class JavaProyectoSIA {
                 case 10:
                     gestor.guardarTodo(sistema);
                     break;
+                case 11: // PENDIENTES por comuna y edad
+                    System.out.println("\n--- Filtro de Votantes PENDIENTES por Comuna y Edad ---");
+                    System.out.print("Comuna: ");
+                    String comunaF = reader.readLine().trim();
+                    System.out.print("Edad mínima: ");
+                    int eMin;
+                    try { eMin = Integer.parseInt(reader.readLine().trim()); }
+                    catch (NumberFormatException ex) { System.out.println("Edad mínima inválida."); break; }
+                    System.out.print("Edad máxima: ");
+                    int eMax;
+                    try { eMax = Integer.parseInt(reader.readLine().trim()); }
+                    catch (NumberFormatException ex) { System.out.println("Edad máxima inválida."); break; }
+
+                    var listaPend = sistema.filtrarPendientesPorComunaYEdad(comunaF, eMin, eMax);
+                    if (listaPend.isEmpty()) {
+                        System.out.println("No hay pendientes que cumplan el criterio.");
+                    } else {
+                        System.out.println("Pendientes encontrados (" + listaPend.size() + "):");
+                        for (Votante v : listaPend) {
+                            System.out.println(" - " + v.getNombre() + " (" + v.getRut() + "), " + v.getEdad() + " años, " + v.getComuna());
+                        }
+                    }
+                    break;
+
+                case 12: // TODOS por comuna y edad (asignados + pendientes)
+                    System.out.println("\n--- Filtro GLOBAL por Comuna y Edad (asignados + pendientes) ---");
+                    System.out.print("Comuna: ");
+                    String comunaG = reader.readLine().trim();
+                    System.out.print("Edad mínima: ");
+                    int gMin;
+                    try { gMin = Integer.parseInt(reader.readLine().trim()); }
+                    catch (NumberFormatException ex) { System.out.println("Edad mínima inválida."); break; }
+                    System.out.print("Edad máxima: ");
+                    int gMax;
+                    try { gMax = Integer.parseInt(reader.readLine().trim()); }
+                    catch (NumberFormatException ex) { System.out.println("Edad máxima inválida."); break; }
+
+                    var listaAll = sistema.filtrarTodosPorComunaYEdad(comunaG, gMin, gMax);
+                    if (listaAll.isEmpty()) {
+                        System.out.println("No hay votantes (asignados o pendientes) que cumplan el criterio.");
+                    } else {
+                        System.out.println("Votantes encontrados (" + listaAll.size() + "):");
+                        for (Votante v : listaAll) {
+                            String estado = (v.getLocalAsignado() == null) ? "PENDIENTE" : ("Asignado a " + v.getLocalAsignado().getNombre());
+                            System.out.println(" - " + v.getNombre() + " (" + v.getRut() + "), " + v.getEdad() + " años, " + v.getComuna() + " — " + estado);
+                        }
+                    }
+                    break;
+
                 case 0:
                     System.out.println("Saliendo del sistema. ¡Adiós!");
                     break;
