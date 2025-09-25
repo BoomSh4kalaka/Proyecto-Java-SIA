@@ -213,7 +213,6 @@ public class GestorCSV {
     // Conveniencia: carga ambos (locales primero, luego votantes)
     public void cargarTodo(SistemaGestion sistema) {
         cargarLocales(sistema);
-        System.out.println("Locales en memoria: " + sistema.getListaLocales().size());
         cargarVotantes(sistema);
     }
 

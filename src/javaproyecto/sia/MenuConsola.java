@@ -52,8 +52,7 @@ public class MenuConsola {
         System.out.println("2. Gestión de Votantes");
         System.out.println("3. Reportes y Filtros");
         System.out.println("4. Realizar Asignación Automática");
-        System.out.println("5. Persistencia (Cargar/Guardar CSV)");
-        System.out.println("0. Salir");
+        System.out.println("0. Salir y Guardar");
         System.out.print("Seleccione una opción: ");
     }
 
@@ -71,9 +70,6 @@ public class MenuConsola {
             case 4:
                 System.out.println("\nIniciando asignación automática...");
                 sistema.autoAsignar();
-                break;
-            case 5:
-                mostrarSubMenuPersistencia();
                 break;
             case 0:
                 System.out.println("Saliendo del sistema. ¡Adiós!");
@@ -123,25 +119,6 @@ public class MenuConsola {
                 case 2: modificarVotante(); break;
                 case 3: eliminarVotante(); break;
                 case 4: filtrarVotantesGlobal(); break;
-                case 0: System.out.println("Volviendo..."); break;
-                default: System.out.println("Opción no válida.");
-            }
-        } while (opcion != 0);
-    }
-
-    private void mostrarSubMenuPersistencia() throws IOException {
-        int opcion;
-        do {
-            System.out.println("\n--- Persistencia de Datos ---");
-            System.out.println("1. Guardar TODO en archivos CSV");
-            System.out.println("2. Cargar TODO desde archivos CSV");
-            System.out.println("0. Volver al Menú Principal");
-            System.out.print("Seleccione una opción: ");
-            opcion = leerOpcion();
-            
-            switch (opcion) {
-                case 1: gestor.guardarTodo(sistema); break;
-                case 2: gestor.cargarTodo(sistema); break;
                 case 0: System.out.println("Volviendo..."); break;
                 default: System.out.println("Opción no válida.");
             }

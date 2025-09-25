@@ -1,5 +1,5 @@
 Id,Nombre,Direccion,Comuna,Capacidad
-L001,Escuela Central,,Santiago,2
-L002,Colegio Nacional,,Providencia,2
-L003,Liceo Moderno,,Ñuñoa,3
+L001,Escuela Central,Calle 2,Santiago,2
+L002,Colegio Nacional,Calle 3,Providencia,2
+L003,Liceo Moderno,Calle 4,Ñuñoa,3
 L004,CGV,Calle 5,Puchuncavi,10
