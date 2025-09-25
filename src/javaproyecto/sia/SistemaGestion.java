@@ -34,23 +34,17 @@ public class SistemaGestion {
     
     
     //SIA 2.9
+    // REEMPLAZA tu antiguo registrarVotante con este:
     public void registrarVotante(Votante v) throws RutDuplicadoException {
-        // 1) Revisar en pendientes
-        for (Votante vp : votantesPendientes) {
-            if (vp.getRut().equalsIgnoreCase(v.getRut())) {
-                throw new RutDuplicadoException("El RUT " + v.getRut() + " ya está registrado como pendiente.");
-            }
+        // Busca en todo el sistema (locales + pendientes)
+        if (buscarVotanteGlobalPorRut(v.getRut()) != null) {
+            throw new RutDuplicadoException("El RUT " + v.getRut() + " ya está registrado en el sistema.");
         }
-        // 2) Revisar en locales ya asignados
-        for (LocalVotacion l : listaLocales) {
-            if (l.buscarVotante(v.getRut()) != null) {
-                throw new RutDuplicadoException("El RUT " + v.getRut() + " ya existe en el local " + l.getNombre());
-            }
-        }
-        // 3) Si pasa las validaciones, agregar
+        // Si no lo encuentra, lo agrega a pendientes
         votantesPendientes.add(v);
     }
 
+    // REEMPLAZA tu antiguo autoAsignar con este:
     public void autoAsignar() {
         Iterator<Votante> it = votantesPendientes.iterator();
 
@@ -60,24 +54,20 @@ public class SistemaGestion {
 
             for (LocalVotacion local : listaLocales) {
                 boolean mismaComuna = votante.getComuna().equalsIgnoreCase(local.getComuna());
-                boolean hayCapacidad = local.getCantidadVotantes() < local.getCapacidad();
 
-                if (mismaComuna && hayCapacidad) {
+                // Ya no es necesario chequear la capacidad aquí, la excepción lo maneja
+                if (mismaComuna) {
                     try {
-                        // ahora puede lanzar CapacidadAgotadaException
-                        local.agregarVotante(votante);
+                        local.agregarVotante(votante); // Intenta agregar
                         System.out.println(" > Votante '" + votante.getNombre() + "' asignado a -> " + local.getNombre());
-                        it.remove(); // lo sacamos de pendientes
+                        it.remove(); 
                         asignado = true;
-                        break;
+                        break; // Votante asignado, pasamos al siguiente
                     } catch (CapacidadAgotadaException e) {
-                        // Si otro hilo/operación llenó el local entre el chequeo y el add
-                        System.out.println(" ! No se pudo asignar a " + local.getNombre() + ": " + e.getMessage());
-                        // seguimos buscando otro local de la misma comuna
+                        // Si este local está lleno, el 'for' continuará buscando otro en la misma comuna
                     }
                 }
             }
-
             if (!asignado) {
                 System.out.println(" ! Votante '" + votante.getNombre() + "' no pudo ser asignado (sin cupo en su comuna).");
             }
@@ -155,40 +145,55 @@ public class SistemaGestion {
     }
 
     
+    // REEMPLAZA tu antiguo eliminarLocalPorId con este:
     public boolean eliminarLocalPorId(String idLocal) {
-        for (Iterator<LocalVotacion> it = listaLocales.iterator(); it.hasNext(); ) {
-            LocalVotacion l = it.next();
-            if (l.getIdLocal().equalsIgnoreCase(idLocal)) {
-                // mover asignados a pendientes
-                for (Votante v : l.getVotantes()) { // ya tienes getVotantes() 
-                    v.setLocalAsignado(null);       // limpiar referencia
-                    votantesPendientes.add(v);      // vuelve a pendientes
-                }
-                it.remove();
-                return true;
+        LocalVotacion localAEliminar = buscarLocalPorId(idLocal);
+
+        if (localAEliminar != null) {
+            // Mover todos los votantes del local a la lista de pendientes
+            for (Votante v : localAEliminar.getVotantes()) {
+                v.setLocalAsignado(null); // Limpiar la referencia al local
+                votantesPendientes.add(v);
             }
+            // Eliminar el local de la lista
+            listaLocales.remove(localAEliminar);
+            return true;
         }
-        return false;
+        return false; // No se encontró el local
     }
+    
+    
+    // REEMPLAZA tu antiguo modificarLocal con este:
     public boolean modificarLocal(String idLocal, String nuevoNombre,
-                              String nuevaDireccion, String nuevaComuna,
-                              Integer nuevaCapacidad) {
-        for (LocalVotacion l : listaLocales) {
-            if (l.getIdLocal().equalsIgnoreCase(idLocal)) {
-                if (nuevoNombre != null && !nuevoNombre.isBlank()) l.setNombre(nuevoNombre);
-                if (nuevaDireccion != null && !nuevaDireccion.isBlank()) l.setDireccion(nuevaDireccion);
-                if (nuevaComuna != null && !nuevaComuna.isBlank()) l.setComuna(nuevaComuna);
-                if (nuevaCapacidad != null) {
-                    if (!l.setCapacidad(nuevaCapacidad)) {
-                        // no se puede bajar por debajo de asignados
-                        return false;
-                    }
-                }
-                return true;
+                                  String nuevaDireccion, String nuevaComuna,
+                                  Integer nuevaCapacidad) {
+        LocalVotacion local = buscarLocalPorId(idLocal);
+        if (local == null) {
+            return false; // No se encontró el local
+        }
+
+        if (nuevoNombre != null && !nuevoNombre.isBlank()) {
+            local.setNombre(nuevoNombre);
+        }
+        if (nuevaDireccion != null && !nuevaDireccion.isBlank()) {
+            local.setDireccion(nuevaDireccion);
+        }
+        if (nuevaComuna != null && !nuevaComuna.isBlank()) {
+            local.setComuna(nuevaComuna);
+        }
+        if (nuevaCapacidad != null) {
+            // El método setCapacidad en LocalVotacion ya valida
+            // si la nueva capacidad es menor a los votantes actuales.
+            if (!local.setCapacidad(nuevaCapacidad)) {
+                return false; // No se pudo cambiar la capacidad
             }
         }
-    return false;
-}
+        return true;
+    }
+    
+    
+    
+    
         // ===== BUSCAR EN 1+ NIVELES: VOTANTE POR RUT =====
     public ResultadoBusquedaVotante buscarVotanteGlobalPorRut(String rut) {
         // 1) Buscar en todos los locales (nivel 2)
