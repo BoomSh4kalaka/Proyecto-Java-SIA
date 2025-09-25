@@ -182,8 +182,13 @@ public class MenuConsola {
             System.out.print("Capacidad máxima: "); int capacidad = Integer.parseInt(reader.readLine());
             
             LocalVotacion nuevoLocal = new LocalVotacion(id, nombre, direccion, comuna, capacidad);
-            sistema.registrarLocal(nuevoLocal);
-            System.out.println("¡Local registrado con éxito!");
+            try {
+                sistema.registrarLocal(nuevoLocal);
+                System.out.println("¡Local '" + nombre + "' registrado con éxito!");
+            } catch (IdLocalDuplicadoException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+
         } catch (NumberFormatException e) {
             System.out.println("Error: la capacidad debe ser un número.");
         }

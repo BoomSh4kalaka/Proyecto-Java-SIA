@@ -28,10 +28,15 @@ public class SistemaGestion {
         public boolean isPendiente() { return esPendiente; }
     }
 
-    public void registrarLocal(LocalVotacion l) {
+    public void registrarLocal(LocalVotacion l) throws IdLocalDuplicadoException {
+        for (LocalVotacion existente : listaLocales) {
+            if (existente.getIdLocal().equalsIgnoreCase(l.getIdLocal())) {
+                throw new IdLocalDuplicadoException("El ID de local '" + l.getIdLocal() + "' ya está registrado.");
+            }
+        }
         listaLocales.add(l);
     }
-    
+
     
     //SIA 2.9
     // REEMPLAZA tu antiguo registrarVotante con este:

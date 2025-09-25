@@ -110,7 +110,12 @@ public class GestorCSV {
                     continue;
                 }
                 LocalVotacion local = new LocalVotacion(id, nombre, direccion, comuna, capacidad);
-                sistema.registrarLocal(local);
+                try {
+    sistema.registrarLocal(local);
+} catch (IdLocalDuplicadoException e) {
+    System.out.println("Duplicado de ID en CSV: " + e.getMessage() + " (se omite este local)");
+}
+
                 System.out.println("  + Local cargado: " + id + " - " + nombre);
             }
 
@@ -176,7 +181,12 @@ public class GestorCSV {
                         System.out.println("Aviso: local referenciado no existía. Se creó " + idLocal);
                         // Usamos capacidad 0; si no alcanza, caerá en catch y lo mandaremos a pendientes
                         local = new LocalVotacion(idLocal, "Desconocido", "", comuna, 0);
-                        sistema.registrarLocal(local);
+                        try {
+    sistema.registrarLocal(local);
+} catch (IdLocalDuplicadoException e) {
+    System.out.println("Duplicado de ID en CSV: " + e.getMessage() + " (se omite este local)");
+}
+
                     }
 
                     // Intentar asignar al local (puede lanzar CapacidadAgotadaException)
