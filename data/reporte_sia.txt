@@ -1,0 +1,38 @@
+
+===== REPORTE GENERAL DE LOCALES DE VOTACIÓN =====
+Local: Escuela Central (ID: L001)
+  Comuna: Santiago
+  Capacidad: 0 / 2
+  (Aún no hay votantes asignados)
+-------------------------------------------------
+Local: Colegio Nacional (ID: L002)
+  Comuna: Providencia
+  Capacidad: 0 / 2
+  (Aún no hay votantes asignados)
+-------------------------------------------------
+Local: Liceo Moderno (ID: L003)
+  Comuna: SAn fleipe
+  Capacidad: 0 / 3
+  (Aún no hay votantes asignados)
+-------------------------------------------------
+Local: CGV (ID: L004)
+  Comuna: Puchuncavi
+  Capacidad: 0 / 10
+  (Aún no hay votantes asignados)
+-------------------------------------------------
+Local: Colegio Nacional3213 (ID: 123213)
+  Comuna: Providen312321cia
+  Capacidad: 0 / 2
+  (Aún no hay votantes asignados)
+-------------------------------------------------
+Local: avestruz23 (ID: 323)
+  Comuna: LOLOL
+  Capacidad: 0 / 20
+  (Aún no hay votantes asignados)
+-------------------------------------------------
+===== VOTANTES PENDIENTES DE ASIGNACIÓN =====
+ - Matias Charriererer (21940651-7)
+ - Matias Charrier (21940651-9)
+ - Alfonso Caponeeee (21933230-0)
+ - Francisca aRos (21696402-0)
+ - Juan Pérez (11111111-1)

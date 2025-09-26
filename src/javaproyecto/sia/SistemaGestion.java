@@ -1,10 +1,16 @@
 package javaproyecto.sia;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
 import java.util.*;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
 
 public class SistemaGestion {
@@ -367,7 +373,24 @@ public String construirReporteGeneral() {
     }
     return sb.toString();
 }
+// Guarda el reporte general a un archivo de texto (UTF-8).
+public void guardarReporteTxt(Path destino) throws IOException {
+    if (destino == null) {
+        throw new IllegalArgumentException("Ruta destino nula.");
+    }
+    // Asegura que exista la carpeta
+    if (destino.getParent() != null) {
+        Files.createDirectories(destino.getParent());
+    }
+    // Volcamos el mismo string que se muestra en la UI
+    String contenido = construirReporteGeneral();
+    Files.writeString(destino, contenido, StandardCharsets.UTF_8);
+}
 
+// Versión cómoda con ruta por defecto: data/reporte_sia.txt
+public void guardarReporteTxt() throws IOException {
+    guardarReporteTxt(Path.of("data", "reporte_sia.txt"));
+}
     
     
     

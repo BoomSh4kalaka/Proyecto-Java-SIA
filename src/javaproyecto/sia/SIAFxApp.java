@@ -92,18 +92,39 @@ public class SIAFxApp extends Application {
     Button refrescar = new Button("Refrescar");
     refrescar.setOnAction(e -> area.setText(sistema.construirReporteGeneral()));
 
-    VBox box = new VBox(8, refrescar, area);
+    Button guardar = new Button("Guardar TXT");
+// (Alternativa con FileChooser)
+    guardar.setOnAction(e -> {
+        try {
+            javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+            fc.setTitle("Guardar reporte TXT");
+            fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Texto (*.txt)", "*.txt"));
+            fc.setInitialFileName("reporte_sia.txt");
+            var file = fc.showSaveDialog(guardar.getScene().getWindow());
+            if (file != null) {
+                sistema.guardarReporteTxt(file.toPath());
+                setStatus("Reporte guardado en: " + file.getAbsolutePath());
+            }
+        } catch (Exception ex) {
+            setStatus("No se pudo guardar el reporte: " + ex.getMessage());
+        }
+    });
+
+
+    HBox barra = new HBox(8, refrescar, guardar);
+    VBox box = new VBox(8, barra, area);
     box.setPadding(new Insets(10));
 
-    // Hace que el TextArea se expanda verticalmente
+    // Que el área crezca y no tengas que scrollear tanto
     VBox.setVgrow(area, Priority.ALWAYS);
 
-    // Cargar de inmediato
+    // Mostrar de inmediato
     area.setText(sistema.construirReporteGeneral());
 
     tab.setContent(box);
     return tab;
 }
+
 
 
     private HBox buildStatusBar() {
