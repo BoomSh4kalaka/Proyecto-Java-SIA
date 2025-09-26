@@ -9,6 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import java.util.Optional;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +26,17 @@ public class SIAFxApp extends Application {
 
     // Componentes compartidos
     private final Label status = new Label("Listo.");
+    
+    // Referencias globales para refrescar
+    private TableView<Votante> tvVotantes;
+    private TableView<LocalVotacion> tvLocales;
+    private TableView<Votante> tvPendientes;
+    private TableView<LocalVotacion> tvLocalesAsignacion;
+    private TableView<Votante> tvFiltros;
+    private TextArea areaReporte;
+    private ComboBox<String> comboComunas;
+
+
 
     // ====== Arranque ======
     @Override
@@ -84,13 +101,13 @@ public class SIAFxApp extends Application {
     Tab tab = new Tab("Reporte");
     tab.setClosable(false);
 
-    TextArea area = new TextArea();
-    area.setEditable(false);
-    area.setWrapText(false);
-    area.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 12;");
+    areaReporte = new TextArea();
+    areaReporte.setEditable(false);
+    areaReporte.setWrapText(false);
+    areaReporte.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 12;");
 
     Button refrescar = new Button("Refrescar");
-    refrescar.setOnAction(e -> area.setText(sistema.construirReporteGeneral()));
+    refrescar.setOnAction(e -> areaReporte.setText(sistema.construirReporteGeneral()));
 
     Button guardar = new Button("Guardar TXT");
 // (Alternativa con FileChooser)
@@ -112,14 +129,14 @@ public class SIAFxApp extends Application {
 
 
     HBox barra = new HBox(8, refrescar, guardar);
-    VBox box = new VBox(8, barra, area);
+    VBox box = new VBox(8, barra, areaReporte);
     box.setPadding(new Insets(10));
 
     // Que el área crezca y no tengas que scrollear tanto
-    VBox.setVgrow(area, Priority.ALWAYS);
+    VBox.setVgrow(areaReporte, Priority.ALWAYS);
 
     // Mostrar de inmediato
-    area.setText(sistema.construirReporteGeneral());
+    areaReporte.setText(sistema.construirReporteGeneral());
 
     tab.setContent(box);
     return tab;
@@ -139,8 +156,9 @@ public class SIAFxApp extends Application {
     private Tab tabLocales() {
         Tab tab = new Tab("Locales");
         tab.setClosable(false);
-
-        TableView<LocalVotacion> tv = new TableView<>();
+        
+        tvLocales = new TableView<>();
+        
         TableColumn<LocalVotacion, String> cId = new TableColumn<>("ID");
         TableColumn<LocalVotacion, String> cNombre = new TableColumn<>("Nombre");
         TableColumn<LocalVotacion, String> cComuna = new TableColumn<>("Comuna");
@@ -154,7 +172,7 @@ public class SIAFxApp extends Application {
         cComuna.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getComuna()));
         cCap.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getCapacidad()).asObject());
         cAsig.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getCantidadVotantes()).asObject());
-        tv.getColumns().addAll(cId, cNombre, cComuna, cCap, cAsig);
+        tvLocales.getColumns().addAll(cId, cNombre, cComuna, cCap, cAsig);
 
         // Formulario
         TextField fId = new TextField(); fId.setPromptText("ID");
@@ -173,8 +191,16 @@ public class SIAFxApp extends Application {
                 int cap = Integer.parseInt(fCap.getText().trim());
                 LocalVotacion nuevo = new LocalVotacion(id, nom, dir, com, cap);
                 sistema.registrarLocal(nuevo); // puede lanzar IdLocalDuplicadoException
-                setStatus("Local agregado.");
-                tv.getItems().setAll(sistema.getListaLocales());
+
+                // 🔹 Ventana informativa usando toString()
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Local agregado");
+                info.setHeaderText("Local agregado con éxito");
+                info.setContentText(nuevo.toString()); // 👈 aquí usamos la sobreescritura
+                info.showAndWait();
+
+                setStatus("Local agregado: " + nuevo);
+                refrescarTablas();
             } catch (NumberFormatException ex) {
                 setStatus("Capacidad inválida.");
             } catch (IdLocalDuplicadoException ex) {
@@ -192,26 +218,56 @@ public class SIAFxApp extends Application {
             }
             boolean ok = sistema.modificarLocal(id, fNombre.getText(), fDir.getText(), fComuna.getText(), nCap);
             setStatus(ok ? "Local modificado." : "No se pudo modificar (ID inex. o capacidad < asignados).");
-            tv.getItems().setAll(sistema.getListaLocales());
+            refrescarTablas();
         });
 
         Button bDel = new Button("Eliminar");
         bDel.setOnAction(e -> {
-            boolean ok = sistema.eliminarLocalPorId(fId.getText().trim());
-            setStatus(ok ? "Local eliminado (votantes a pendientes)." : "ID no encontrado.");
-            tv.getItems().setAll(sistema.getListaLocales());
+            LocalVotacion seleccionado = tvLocales.getSelectionModel().getSelectedItem();
+            if (seleccionado == null) {
+                setStatus("Seleccione un local primero.");
+                return;
+            }
+
+            // 🔹 Confirmación (solo ID del local)
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Confirmar eliminación");
+            confirm.setHeaderText("¿Seguro desea eliminar este local?");
+            confirm.setContentText("ID: " + seleccionado.getIdLocal());
+            Optional<ButtonType> result = confirm.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                boolean ok = sistema.eliminarLocalPorId(seleccionado.getIdLocal());
+
+                if (ok) {
+                    refrescarTablas();
+
+                    // 🔹 Mensaje de éxito con todos los detalles (toString)
+                    Alert info = new Alert(Alert.AlertType.INFORMATION);
+                    info.setTitle("Local eliminado");
+                    info.setHeaderText("El local fue eliminado con éxito");
+                    info.setContentText(seleccionado.toString());
+                    info.showAndWait();
+
+                    setStatus("Local eliminado: " + seleccionado.getNombre());
+                } else {
+                    setStatus("No se pudo eliminar el local.");
+                }
+            }
         });
+
+
 
         HBox form1 = new HBox(8, fId, fNombre, fDir, fComuna, fCap);
         HBox form2 = new HBox(8, bAdd, bMod, bDel);
         form1.setAlignment(Pos.CENTER_LEFT);
         form2.setAlignment(Pos.CENTER_LEFT);
 
-        VBox box = new VBox(10, tv, form1, form2);
+        VBox box = new VBox(10, tvLocales, form1, form2);
         box.setPadding(new Insets(10));
 
         // Selección → llena form
-        tv.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
+        tvLocales.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             if (b == null) return;
             fId.setText(b.getIdLocal());
             fNombre.setText(b.getNombre());
@@ -221,7 +277,7 @@ public class SIAFxApp extends Application {
         });
 
         // datos iniciales
-        tv.getItems().setAll(sistema.getListaLocales());
+        tvLocales.getItems().setAll(sistema.getListaLocales());
 
         tab.setContent(box);
         return tab;
@@ -232,7 +288,8 @@ public class SIAFxApp extends Application {
         Tab tab = new Tab("Votantes");
         tab.setClosable(false);
 
-        TableView<Votante> tv = new TableView<>();
+        tvVotantes = new TableView<>();
+   
         TableColumn<Votante, String> cRut = new TableColumn<>("RUT");
         TableColumn<Votante, String> cNom = new TableColumn<>("Nombre");
         TableColumn<Votante, String> cCom = new TableColumn<>("Comuna");
@@ -247,7 +304,7 @@ public class SIAFxApp extends Application {
         cEst.setCellValueFactory(c -> new SimpleStringProperty(
                 c.getValue().getLocalAsignado() == null ? "PENDIENTE" : "Asignado a " + c.getValue().getLocalAsignado().getNombre()
         ));
-        tv.getColumns().addAll(cRut, cNom, cCom, cEdad, cEst);
+        tvVotantes.getColumns().addAll(cRut, cNom, cCom, cEdad, cEst);
 
         TextField fRut = new TextField(); fRut.setPromptText("RUT (no se modifica)");
         TextField fNom = new TextField(); fNom.setPromptText("Nombre completo");
@@ -268,7 +325,7 @@ public class SIAFxApp extends Application {
                 );
                 sistema.registrarVotante(v); // puede lanzar RutDuplicadoException
                 setStatus("Votante registrado (pendiente).");
-                tv.getItems().setAll(vistaVotantesGlobal());
+                refrescarTablas();
             } catch (NumberFormatException ex) {
                 setStatus("Edad inválida.");
             } catch (RutDuplicadoException ex) {
@@ -288,14 +345,58 @@ public class SIAFxApp extends Application {
                         nEdad
                 );
                 setStatus(ok ? "Votante modificado." : "No existe un votante con ese RUT.");
-                tv.getItems().setAll(vistaVotantesGlobal());
+                refrescarTablas();
             } catch (NumberFormatException ex) {
                 setStatus("Edad inválida.");
             }
         });
+        
+        // === Botón Eliminar con confirmación ===
+        Button bDel = new Button("Eliminar");
+        bDel.setOnAction(e -> {
+        String rut = fRut.getText().trim();
+        if (rut.isEmpty()) {
+            setStatus("Debe seleccionar un votante para eliminar.");
+            return;
+        }
+
+        var res = sistema.buscarVotanteGlobalPorRut(rut);
+        if (res == null) {
+            setStatus("No existe un votante con ese RUT.");
+            return;
+        }
+
+        Votante votante = res.getVotante();
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar eliminación");
+        confirm.setHeaderText(null);
+        confirm.setContentText("¿Seguro que deseas eliminar al votante con RUT: " + rut + "?");
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                boolean ok = sistema.eliminarVotanteGlobalPorRut(rut); // 👈 asegúrate que exista este método
+                if (ok) {
+                    Alert info = new Alert(Alert.AlertType.INFORMATION);
+                    info.setTitle("Votante eliminado");
+                    info.setHeaderText("Votante eliminado con éxito");
+                    info.setContentText(votante.identificarse()); // 👈 aquí usas la sobreescritura
+                    info.showAndWait();
+
+                    setStatus("Votante eliminado.");
+                    refrescarTablas();
+                } else {
+                    setStatus("No se pudo eliminar al votante.");
+                }
+            }
+        });
+    });
+
+
+
 
         // Selección de fila → carga al formulario
-        tv.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
+        tvVotantes.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             if (b == null) return;
             fRut.setText(b.getRut());
             fNom.setText(b.getNombre());
@@ -304,13 +405,13 @@ public class SIAFxApp extends Application {
             fEdad.setText(String.valueOf(b.getEdad()));
         });
 
-        HBox form = new HBox(8, fRut, fNom, fDir, fCom, fEdad, bReg, bMod);
+        HBox form = new HBox(8, fRut, fNom, fDir, fCom, fEdad, bReg, bMod, bDel);
         form.setAlignment(Pos.CENTER_LEFT);
 
-        VBox box = new VBox(10, tv, form);
+        VBox box = new VBox(10, tvVotantes, form);
         box.setPadding(new Insets(10));
 
-        tv.getItems().setAll(vistaVotantesGlobal());
+        tvVotantes.getItems().setAll(vistaVotantesGlobal());
         tab.setContent(box);
         return tab;
     }
@@ -326,32 +427,109 @@ public class SIAFxApp extends Application {
     private Tab tabAsignacion() {
         Tab tab = new Tab("Asignación");
         tab.setClosable(false);
-        Button b = new Button("Autoasignar pendientes por comuna");
-        Label msg = new Label();
-        b.setOnAction(e -> {
-            sistema.autoAsignar(); // dentro ya manejas CapacidadAgotadaException en try–catch
-            msg.setText("Autoasignación completada.");
+
+        // ComboBox de comunas
+        Set<String> setCom = sistema.getListaLocales().stream()
+                .map(LocalVotacion::getComuna)
+                .collect(Collectors.toSet());
+
+        ObservableList<String> comunas = FXCollections.observableArrayList(setCom);
+        comunas.add(0, "Todos"); // opción general
+
+        comboComunas = new ComboBox<>(comunas); // usas la global
+        comboComunas.setValue("Todos");
+
+
+        // Botón de autoasignar
+        Button bAuto = new Button("Autoasignar");
+        
+        // Tabla de pendientes
+        tvPendientes = new TableView<>();
+    
+        TableColumn<Votante, String> cRut = new TableColumn<>("RUT");
+        TableColumn<Votante, String> cNom = new TableColumn<>("Nombre");
+        TableColumn<Votante, String> cCom = new TableColumn<>("Comuna");
+        TableColumn<Votante, Integer> cEdad = new TableColumn<>("Edad");
+
+        cRut.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getRut()));
+        cNom.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNombre()));
+        cCom.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getComuna()));
+        cEdad.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getEdad()).asObject());
+
+        cRut.setPrefWidth(140); cNom.setPrefWidth(200);
+        cCom.setPrefWidth(160); cEdad.setPrefWidth(80);
+        tvPendientes.getColumns().addAll(cRut, cNom, cCom, cEdad);
+        tvPendientes.getItems().setAll(sistema.getVotantesPendientes());
+
+        // Tabla de locales
+        tvLocalesAsignacion = new TableView<>();
+        
+        TableColumn<LocalVotacion, String> cId = new TableColumn<>("ID");
+        TableColumn<LocalVotacion, String> cNomLoc = new TableColumn<>("Nombre");
+        TableColumn<LocalVotacion, String> cComLoc = new TableColumn<>("Comuna");
+        TableColumn<LocalVotacion, Integer> cCap = new TableColumn<>("Capacidad");
+        TableColumn<LocalVotacion, Integer> cOcup = new TableColumn<>("Ocupados");
+
+        cId.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getIdLocal()));
+        cNomLoc.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNombre()));
+        cComLoc.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getComuna()));
+        cCap.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getCapacidad()).asObject());
+        cOcup.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getVotantes().size()).asObject());
+
+        cId.setPrefWidth(60); cNomLoc.setPrefWidth(200);
+        cComLoc.setPrefWidth(160); cCap.setPrefWidth(100); cOcup.setPrefWidth(100);
+        tvLocalesAsignacion.getColumns().addAll(cId, cNomLoc, cComLoc, cCap, cOcup);
+        tvLocalesAsignacion.getItems().setAll(sistema.getListaLocales());
+
+        // Acción del botón
+        bAuto.setOnAction(e -> {
+            String comunaSeleccionada = comboComunas.getValue();
+            if (comunaSeleccionada == null) {
+                setStatus("Seleccione una comuna o 'Todos'.");
+                return;
+            }
+
+            if ("Todos".equals(comunaSeleccionada)) {
+                sistema.autoAsignar();
+            } else {
+                sistema.autoAsignar(comunaSeleccionada);
+            }
+
+            // 🔄 Refrescar tablas
+            refrescarTablas();
+
             setStatus("Autoasignación completada.");
         });
-        VBox box = new VBox(10, b, msg);
+
+        HBox top = new HBox(10, new Label("Comuna:"), comboComunas, bAuto);
+        top.setAlignment(Pos.CENTER_LEFT);
+
+        VBox box = new VBox(10, top, new Label("Pendientes:"), tvPendientes, new Label("Locales:"), tvLocalesAsignacion);
         box.setPadding(new Insets(10));
-        box.setAlignment(Pos.CENTER_LEFT);
+
         tab.setContent(box);
         return tab;
     }
+
+
+
+
+
 
     // ====== Tab: Filtros (SIA2.5) ======
     private Tab tabFiltros() {
         Tab tab = new Tab("Filtros");
         tab.setClosable(false);
 
+        TextField fRut = new TextField(); fRut.setPromptText("RUT");
         TextField fCom = new TextField(); fCom.setPromptText("Comuna");
         TextField fMin = new TextField(); fMin.setPromptText("Edad min");
         TextField fMax = new TextField(); fMax.setPromptText("Edad max");
+
         Button bPend = new Button("Buscar PENDIENTES");
         Button bAll = new Button("Buscar TODOS");
 
-        TableView<Votante> tv = new TableView<>();
+        tvFiltros = new TableView<>();
         TableColumn<Votante, String> cRut = new TableColumn<>("RUT");
         TableColumn<Votante, String> cNom = new TableColumn<>("Nombre");
         TableColumn<Votante, String> cCom = new TableColumn<>("Comuna");
@@ -366,39 +544,112 @@ public class SIAFxApp extends Application {
         cEst.setCellValueFactory(c -> new SimpleStringProperty(
                 c.getValue().getLocalAsignado() == null ? "PENDIENTE" : "Asignado a " + c.getValue().getLocalAsignado().getNombre()
         ));
-        tv.getColumns().addAll(cRut, cNom, cCom, cEdad, cEst);
+        tvFiltros.getColumns().addAll(cRut, cNom, cCom, cEdad, cEst);
 
+        // Botón PENDIENTES
         bPend.setOnAction(e -> {
             try {
+                String rut = fRut.getText().trim();
+                if (rut.isEmpty()) rut = null;
+
                 String comuna = fCom.getText().trim();
-                int min = Integer.parseInt(fMin.getText().trim());
-                int max = Integer.parseInt(fMax.getText().trim());
-                tv.getItems().setAll(sistema.filtrarPendientesPorComunaYEdad(comuna, min, max));
-                setStatus("Filtro pendientes: " + tv.getItems().size() + " resultado(s).");
+                if (comuna.isEmpty()) comuna = null;
+
+                Integer min = null;
+                if (!fMin.getText().trim().isEmpty()) {
+                    min = Integer.parseInt(fMin.getText().trim());
+                }
+
+                Integer max = null;
+                if (!fMax.getText().trim().isEmpty()) {
+                    max = Integer.parseInt(fMax.getText().trim());
+                }
+
+                List<Votante> resultados = sistema.filtrarVotantes(rut, comuna, min, max, true, false);
+                tvFiltros.getItems().setAll(resultados);
+                setStatus("Filtro pendientes: " + resultados.size() + " resultado(s).");
             } catch (NumberFormatException ex) {
                 setStatus("Edades inválidas.");
             }
         });
 
+        // 🔹 Botón TODOS
         bAll.setOnAction(e -> {
             try {
+                String rut = fRut.getText().trim();
+                if (rut.isEmpty()) rut = null;
+
                 String comuna = fCom.getText().trim();
-                int min = Integer.parseInt(fMin.getText().trim());
-                int max = Integer.parseInt(fMax.getText().trim());
-                tv.getItems().setAll(sistema.filtrarTodosPorComunaYEdad(comuna, min, max));
-                setStatus("Filtro global: " + tv.getItems().size() + " resultado(s).");
+                if (comuna.isEmpty()) comuna = null;
+
+                Integer min = null;
+                if (!fMin.getText().trim().isEmpty()) {
+                    min = Integer.parseInt(fMin.getText().trim());
+                }
+
+                Integer max = null;
+                if (!fMax.getText().trim().isEmpty()) {
+                    max = Integer.parseInt(fMax.getText().trim());
+                }
+
+                List<Votante> resultados = sistema.filtrarVotantes(rut, comuna, min, max, true, true);
+                tvFiltros.getItems().setAll(resultados);
+                setStatus("Filtro global: " + resultados.size() + " resultado(s).");
             } catch (NumberFormatException ex) {
                 setStatus("Edades inválidas.");
             }
         });
 
-        HBox filtros = new HBox(8, fCom, fMin, fMax, bPend, bAll);
+        HBox filtros = new HBox(8, fRut, fCom, fMin, fMax, bPend, bAll);
         filtros.setAlignment(Pos.CENTER_LEFT);
-        VBox box = new VBox(10, filtros, tv);
+        VBox box = new VBox(10, filtros, tvFiltros);
         box.setPadding(new Insets(10));
         tab.setContent(box);
         return tab;
     }
+    
+    private void refrescarTablas() {
+        if (tvVotantes != null) {
+            tvVotantes.getItems().setAll(vistaVotantesGlobal());
+            tvVotantes.refresh();
+        }
+        if (tvLocales != null) {
+            tvLocales.getItems().setAll(sistema.getListaLocales());
+            tvLocales.refresh();
+        }
+        if (tvPendientes != null) {
+            tvPendientes.getItems().setAll(sistema.getVotantesPendientes());
+            tvPendientes.refresh();
+        }
+        if (tvLocalesAsignacion != null) {
+            tvLocalesAsignacion.getItems().setAll(sistema.getListaLocales());
+            tvLocalesAsignacion.refresh();
+        }
+        if (areaReporte != null) {
+            areaReporte.setText(sistema.construirReporteGeneral());
+        }
+        
+        if (comboComunas != null) {
+        Set<String> setCom = sistema.getListaLocales().stream()
+                .map(LocalVotacion::getComuna)
+                .collect(Collectors.toSet());
+
+            ObservableList<String> comunas = FXCollections.observableArrayList(setCom);
+            comunas.add(0, "Todos");
+
+            String seleccionActual = comboComunas.getValue();
+            comboComunas.setItems(comunas);
+
+            // Mantener selección si sigue siendo válida, si no volver a "Todos"
+            if (seleccionActual != null && comunas.contains(seleccionActual)) {
+                comboComunas.setValue(seleccionActual);
+            } else {
+                comboComunas.setValue("Todos");
+            }
+        }
+    }
+
+
 
     public static void main(String[] args) {
         launch();

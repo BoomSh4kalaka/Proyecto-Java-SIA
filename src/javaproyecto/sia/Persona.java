@@ -35,5 +35,13 @@ public class Persona {
 
     public int getEdad() { return edad; }
     public void setEdad(int edad) { this.edad = edad; }
+    
+    public String identificarse() {
+        return "Nombre: " + nombre + "\n"
+             + "RUT: " + rut + "\n"
+             + "Dirección: " + direccion + "\n"
+             + "Comuna: " + comuna + "\n"
+             + "Edad: " + edad;
+    }
 
 }

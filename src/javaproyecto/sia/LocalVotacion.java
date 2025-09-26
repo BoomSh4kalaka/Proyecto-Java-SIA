@@ -107,4 +107,14 @@ public boolean eliminarVotantePorRut(String rut) {
         return mapaVotantes.remove(rut) != null; 
     }
     
+    @Override
+    public String toString() {
+        return "Nombre: " + nombre + "\n" +
+               "ID: " + idLocal + "\n" +
+               "Comuna: " + comuna + "\n" +
+               "Dirección: " + direccion + "\n" +
+               "Capacidad: " + capacidad + "\n" +
+               "Votantes asignados: " + getCantidadVotantes();
+    }
+
 }

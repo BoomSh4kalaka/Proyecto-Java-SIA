@@ -4,6 +4,7 @@ package javaproyecto.sia;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import java.util.*;
 
@@ -85,6 +86,43 @@ public class SistemaGestion {
         }
         System.out.println("Proceso de asignación finalizado.");
     }
+    
+    public void autoAsignar(String comuna) {
+        Iterator<Votante> it = votantesPendientes.iterator();
+
+        while (it.hasNext()) {
+            Votante votante = it.next();
+
+            // saltar votantes que no son de la comuna seleccionada
+            if (!votante.getComuna().equalsIgnoreCase(comuna)) {
+                continue;
+            }
+
+            boolean asignado = false;
+
+            for (LocalVotacion local : listaLocales) {
+                boolean mismaComuna = votante.getComuna().equalsIgnoreCase(local.getComuna());
+
+                if (mismaComuna) {
+                    try {
+                        local.agregarVotante(votante);
+                        System.out.println(" > Votante '" + votante.getNombre() + "' asignado a -> " + local.getNombre());
+                        it.remove();
+                        asignado = true;
+                        break;
+                    } catch (CapacidadAgotadaException e) {
+                        // Si este local está lleno, sigue buscando en otros de la misma comuna
+                    }
+                }
+            }
+
+            if (!asignado) {
+                System.out.println(" ! Votante '" + votante.getNombre() + "' no pudo ser asignado en comuna " + comuna + " (sin cupo).");
+            }
+        }
+        System.out.println("Proceso de asignación finalizado para comuna: " + comuna);
+    }
+
 
     
     public LocalVotacion buscarLocal(String nombre) {
@@ -207,6 +245,24 @@ public boolean modificarVotantePorRut(String rut,
             }
         }
         return res;
+    }
+
+    public List<Votante> filtrarVotantes(String rut, String comuna, Integer minEdad, Integer maxEdad, boolean incluirPendientes, boolean incluirAsignados) {
+        List<Votante> all = new ArrayList<>();
+
+        if (incluirPendientes) all.addAll(votantesPendientes);
+        if (incluirAsignados) {
+            for (LocalVotacion l : listaLocales) {
+                all.addAll(l.getVotantes());
+            }
+        }
+
+        return all.stream()
+                .filter(v -> (rut == null || v.getRut().equalsIgnoreCase(rut)))
+                .filter(v -> (comuna == null || v.getComuna().equalsIgnoreCase(comuna)))
+                .filter(v -> (minEdad == null || v.getEdad() >= minEdad))
+                .filter(v -> (maxEdad == null || v.getEdad() <= maxEdad))
+                .collect(Collectors.toList());
     }
 
     
