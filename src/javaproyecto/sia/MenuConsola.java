@@ -159,8 +159,6 @@ public class MenuConsola {
         System.out.println("\n--- Modificación de Votante ---");
         System.out.print("Ingrese el RUT del votante a modificar: ");
         String rut = reader.readLine();
-        // La lógica de modificación se mantiene en SistemaGestion para reutilización
-        // (No implementada en este ejemplo, pero seguiría el mismo patrón)
         System.out.println("Funcionalidad de modificar votante no implementada en este menú.");
     }
     

@@ -8,10 +8,11 @@ public class GestorCSV {
     private static final String rutaLocales = "data/locales.csv";
     private static final String rutaVotantes = "data/votantes.csv";
 
+    /* ================== Escritura ================== */
 
-    /* ------------------ Escritura ------------------ */
-
-    // Guarda todos los locales (todos sus atributos)
+    /**
+     * Guarda en archivo CSV todos los locales de votación con sus atributos.
+     */
     public static void guardarLocales(SistemaGestion sistema) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(rutaLocales))) {
             // Cabecera
@@ -72,7 +73,7 @@ public class GestorCSV {
             System.err.println("Error al guardar votantes: " + e.getMessage());
         }
     }
-    // Conveniencia: guarda ambos archivos
+    // guarda ambos archivos
     public void guardarTodo(SistemaGestion sistema) {
         guardarLocales(sistema);
         guardarVotantes(sistema);
@@ -92,7 +93,7 @@ public class GestorCSV {
                     continue;
                 }
 
-                String[] partes = linea.split(",", -1); // <-- EL -1 es CLAVE, conserva columnas vacías
+                String[] partes = linea.split(",", -1);
                 if (partes.length != 5) {
                     System.err.println("Línea inválida en locales.csv: " + linea);
                     continue;
@@ -182,12 +183,12 @@ public class GestorCSV {
                         // Usamos capacidad 0; si no alcanza, caerá en catch y lo mandaremos a pendientes
                         local = new LocalVotacion(idLocal, "Desconocido", "", comuna, 0);
                         try {
-    sistema.registrarLocal(local);
-} catch (IdLocalDuplicadoException e) {
-    System.out.println("Duplicado de ID en CSV: " + e.getMessage() + " (se omite este local)");
-}
+                            sistema.registrarLocal(local);
+                            } catch (IdLocalDuplicadoException e) {
+                                System.out.println("Duplicado de ID en CSV: " + e.getMessage() + " (se omite este local)");
+                            }
 
-                    }
+                        }
 
                     // Intentar asignar al local (puede lanzar CapacidadAgotadaException)
                     try {
@@ -228,7 +229,6 @@ public class GestorCSV {
 
     /* ------------------ Helpers CSV ------------------ */
 
-    // arma una línea CSV con comillas y comillas escapadas
     private String csvLine(String... campos) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < campos.length; i++) {
@@ -238,13 +238,12 @@ public class GestorCSV {
         return sb.toString();
     }
 
-    // siempre ponemos comillas y escapamos comillas internas
     private String escapeForCSV(String campo) {
-        String s = campo.replace("\"", "\"\""); // doble comilla interna
+        String s = campo.replace("\"", "\"\""); 
         return "\"" + s + "\"";
     }
 
-    // parsea correctamente una línea CSV con comillas y "" como escape
+    
     private String[] parseCSVLine(String line) {
         List<String> campos = new ArrayList<>();
         StringBuilder cur = new StringBuilder();
@@ -253,12 +252,12 @@ public class GestorCSV {
             char c = line.charAt(i);
             if (inQuotes) {
                 if (c == '"') {
-                    // si la siguiente es quote -> es comilla escapada
+                  
                     if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
                         cur.append('"');
-                        i++; // saltamos el segundo quote
+                        i++; 
                     } else {
-                        inQuotes = false; // cierre
+                        inQuotes = false; 
                     }
                 } else {
                     cur.append(c);

@@ -1,4 +1,5 @@
 Id,Nombre,Direccion,Comuna,Capacidad
-L1,Local D,Calle1,Centro,3
-L2,Local E,Calle2,Norte,2
-L3,Local E,Calle2,Sur,2
+L001,Colegio República,Av. Central 123,Centro,3
+L002,Escuela Norte,Calle Norte 456,Norte,2
+L003,Liceo Sur,Calle Sur 789,Sur,2
+L004,Colegio Este,Calle Este 101,Este,2

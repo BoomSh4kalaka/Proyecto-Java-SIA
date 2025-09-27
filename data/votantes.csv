@@ -1,6 +1,11 @@
 Rut,Nombre,Direccion,Comuna,Edad,IdLocal
-11111111-2,V2,Calle 2,Centro,30,L1
-11111111-1,V1,Calle 1,Centro,30,L1
-11111111-3,V3,Calle 3,Centro,30,L1
-11111111-5,V5,Calle 5,Norte,30,
-11111111-4,V4,Calle 4,Norte,30,
+11111111-1,Ana Pérez,Calle A 10,Centro,30,
+22222222-2,Juan Soto,Calle B 20,Centro,45,
+33333333-3,Camila Díaz,Calle C 30,Centro,28,
+44444444-4,Pedro López,Calle D 40,Norte,50,
+55555555-5,Lucía Fernández,Calle E 50,Norte,35,
+66666666-6,Carlos Ramírez,Calle F 60,Norte,40,
+77777777-7,María González,Calle G 70,Sur,22,
+88888888-8,Andrés Vega,Calle H 80,Este,19,
+99999999-9,Laura Torres,Calle I 90,Este,32,
+10101010-0,Esteban Muñoz,Calle J 100,Centro,27,

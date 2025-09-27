@@ -77,14 +77,14 @@ public class LocalVotacion {
     public int getCantidadVotantes() {
         return mapaVotantes.size();
     }
-public boolean eliminarVotantePorRut(String rut) {
-    Votante v = mapaVotantes.remove(rut);
-    if (v != null) {
-        v.setLocalAsignado(null);
-        return true;
+    public boolean eliminarVotantePorRut(String rut) {
+        Votante v = mapaVotantes.remove(rut);
+        if (v != null) {
+            v.setLocalAsignado(null);
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
     public void mostrarInfoDetallada() {
         System.out.println("Local: " + this.nombre + " (ID: " + this.idLocal + ")");

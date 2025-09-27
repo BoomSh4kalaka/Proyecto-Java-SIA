@@ -51,8 +51,8 @@ public class SIAFxApp extends Application {
         }
 
         BorderPane root = new BorderPane();
-        root.setTop(buildToolbar());   // veremos abajo que la toolbar ya NO tendrá botones CSV
-        root.setCenter(buildTabs());   // las pestañas se construyen con datos ya cargados
+        root.setTop(buildToolbar());   
+        root.setCenter(buildTabs());   
         root.setBottom(buildStatusBar());
 
         Scene scene = new Scene(root, 1100, 700);
@@ -98,49 +98,47 @@ public class SIAFxApp extends Application {
     }
 
     private Tab tabReporte() {
-    Tab tab = new Tab("Reporte");
-    tab.setClosable(false);
+        Tab tab = new Tab("Reporte");
+        tab.setClosable(false);
 
-    areaReporte = new TextArea();
-    areaReporte.setEditable(false);
-    areaReporte.setWrapText(false);
-    areaReporte.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 12;");
+        areaReporte = new TextArea();
+        areaReporte.setEditable(false);
+        areaReporte.setWrapText(false);
+        areaReporte.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 12;");
 
-    Button refrescar = new Button("Refrescar");
-    refrescar.setOnAction(e -> areaReporte.setText(sistema.construirReporteGeneral()));
+        Button refrescar = new Button("Refrescar");
+        refrescar.setOnAction(e -> areaReporte.setText(sistema.construirReporteGeneral()));
 
-    Button guardar = new Button("Guardar TXT");
-// (Alternativa con FileChooser)
-    guardar.setOnAction(e -> {
-        try {
-            javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
-            fc.setTitle("Guardar reporte TXT");
-            fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Texto (*.txt)", "*.txt"));
-            fc.setInitialFileName("reporte_sia.txt");
-            var file = fc.showSaveDialog(guardar.getScene().getWindow());
-            if (file != null) {
-                sistema.guardarReporteTxt(file.toPath());
-                setStatus("Reporte guardado en: " + file.getAbsolutePath());
+        Button guardar = new Button("Guardar TXT");
+    // (Alternativa con FileChooser)
+        guardar.setOnAction(e -> {
+            try {
+                javafx.stage.FileChooser fc = new javafx.stage.FileChooser();
+                fc.setTitle("Guardar reporte TXT");
+                fc.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Texto (*.txt)", "*.txt"));
+                fc.setInitialFileName("reporte_sia.txt");
+                var file = fc.showSaveDialog(guardar.getScene().getWindow());
+                if (file != null) {
+                    sistema.guardarReporteTxt(file.toPath());
+                    setStatus("Reporte guardado en: " + file.getAbsolutePath());
+                }
+            } catch (Exception ex) {
+                setStatus("No se pudo guardar el reporte: " + ex.getMessage());
             }
-        } catch (Exception ex) {
-            setStatus("No se pudo guardar el reporte: " + ex.getMessage());
-        }
-    });
+        });
 
 
-    HBox barra = new HBox(8, refrescar, guardar);
-    VBox box = new VBox(8, barra, areaReporte);
-    box.setPadding(new Insets(10));
+        HBox barra = new HBox(8, refrescar, guardar);
+        VBox box = new VBox(8, barra, areaReporte);
+        box.setPadding(new Insets(10));
 
-    // Que el área crezca y no tengas que scrollear tanto
-    VBox.setVgrow(areaReporte, Priority.ALWAYS);
+        VBox.setVgrow(areaReporte, Priority.ALWAYS);
 
-    // Mostrar de inmediato
-    areaReporte.setText(sistema.construirReporteGeneral());
+        areaReporte.setText(sistema.construirReporteGeneral());
 
-    tab.setContent(box);
-    return tab;
-}
+        tab.setContent(box);
+        return tab;
+    }
 
 
 
@@ -152,7 +150,7 @@ public class SIAFxApp extends Application {
 
     private void setStatus(String s) { status.setText(s); }
 
-    // ====== Tab: Locales (CRUD nivel 1) ======
+    // ====== Tab: Locales ======
     private Tab tabLocales() {
         Tab tab = new Tab("Locales");
         tab.setClosable(false);
@@ -192,11 +190,11 @@ public class SIAFxApp extends Application {
                 LocalVotacion nuevo = new LocalVotacion(id, nom, dir, com, cap);
                 sistema.registrarLocal(nuevo); // puede lanzar IdLocalDuplicadoException
 
-                // 🔹 Ventana informativa usando toString()
+                // Ventana informativa usando toString()
                 Alert info = new Alert(Alert.AlertType.INFORMATION);
                 info.setTitle("Local agregado");
                 info.setHeaderText("Local agregado con éxito");
-                info.setContentText(nuevo.toString()); // 👈 aquí usamos la sobreescritura
+                info.setContentText(nuevo.toString()); // uso sobreescritura
                 info.showAndWait();
 
                 setStatus("Local agregado: " + nuevo);
@@ -229,7 +227,7 @@ public class SIAFxApp extends Application {
                 return;
             }
 
-            // 🔹 Confirmación (solo ID del local)
+            // Confirmación (solo ID del local)
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Confirmar eliminación");
             confirm.setHeaderText("¿Seguro desea eliminar este local?");
@@ -242,7 +240,7 @@ public class SIAFxApp extends Application {
                 if (ok) {
                     refrescarTablas();
 
-                    // 🔹 Mensaje de éxito con todos los detalles (toString)
+                    // Mensaje de éxito con todos los detalles (toString)
                     Alert info = new Alert(Alert.AlertType.INFORMATION);
                     info.setTitle("Local eliminado");
                     info.setHeaderText("El local fue eliminado con éxito");
@@ -266,7 +264,6 @@ public class SIAFxApp extends Application {
         VBox box = new VBox(10, tvLocales, form1, form2);
         box.setPadding(new Insets(10));
 
-        // Selección → llena form
         tvLocales.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             if (b == null) return;
             fId.setText(b.getIdLocal());
@@ -283,7 +280,7 @@ public class SIAFxApp extends Application {
         return tab;
     }
 
-    // ====== Tab: Votantes (altas y vista global) ======
+    // ====== Tab: Votantes ======
     private Tab tabVotantes() {
         Tab tab = new Tab("Votantes");
         tab.setClosable(false);
@@ -375,12 +372,12 @@ public class SIAFxApp extends Application {
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                boolean ok = sistema.eliminarVotanteGlobalPorRut(rut); // 👈 asegúrate que exista este método
+                boolean ok = sistema.eliminarVotanteGlobalPorRut(rut); 
                 if (ok) {
                     Alert info = new Alert(Alert.AlertType.INFORMATION);
                     info.setTitle("Votante eliminado");
                     info.setHeaderText("Votante eliminado con éxito");
-                    info.setContentText(votante.identificarse()); // 👈 aquí usas la sobreescritura
+                    info.setContentText(votante.identificarse()); // uso sobreescritura
                     info.showAndWait();
 
                     setStatus("Votante eliminado.");
@@ -392,10 +389,6 @@ public class SIAFxApp extends Application {
         });
     });
 
-
-
-
-        // Selección de fila → carga al formulario
         tvVotantes.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
             if (b == null) return;
             fRut.setText(b.getRut());
@@ -436,7 +429,7 @@ public class SIAFxApp extends Application {
         ObservableList<String> comunas = FXCollections.observableArrayList(setCom);
         comunas.add(0, "Todos"); // opción general
 
-        comboComunas = new ComboBox<>(comunas); // usas la global
+        comboComunas = new ComboBox<>(comunas);
         comboComunas.setValue("Todos");
 
 
@@ -495,7 +488,7 @@ public class SIAFxApp extends Application {
                 sistema.autoAsignar(comunaSeleccionada);
             }
 
-            // 🔄 Refrescar tablas
+            // Refrescar tablas
             refrescarTablas();
 
             setStatus("Autoasignación completada.");
@@ -573,7 +566,7 @@ public class SIAFxApp extends Application {
             }
         });
 
-        // 🔹 Botón TODOS
+        // Botón TODOS
         bAll.setOnAction(e -> {
             try {
                 String rut = fRut.getText().trim();
