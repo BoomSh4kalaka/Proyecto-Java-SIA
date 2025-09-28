@@ -189,8 +189,9 @@ public class SistemaGestion {
         return null;
     }
     
+    // Retonarnamos una copia de la colección para evitar un add, remove, entre otros sin control
     public List<Votante> getVotantesPendientes() {
-        return Collections.unmodifiableList(votantesPendientes);
+        return Collections.unmodifiableList(new ArrayList<>(votantesPendientes));
     }
     public boolean eliminarVotanteGlobalPorRut(String rut) {
         // en asignados
@@ -346,9 +347,9 @@ public class SistemaGestion {
         return null;
     }
 
-
+    // Retornamos una copia para evitar modificaciones a la real
     public List<LocalVotacion> getListaLocales() {
-        return Collections.unmodifiableList(listaLocales);
+        return Collections.unmodifiableList(new ArrayList<>(listaLocales));
     }
     
     public void imprimirReporteGeneral() {
